@@ -3,14 +3,14 @@ module github.com/margined-protocol/locust-core
 go 1.24.2
 require (
 	cosmossdk.io/errors v1.0.1 // indirect
-	cosmossdk.io/math v1.4.0
+	cosmossdk.io/math v1.5.0
 	github.com/BurntSushi/toml v1.5.0
 	github.com/CosmWasm/wasmd v0.51.0
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/cometbft/cometbft v0.38.12
+	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-sdk v0.50.13
 	github.com/google/uuid v1.6.0
-	github.com/ignite/cli/v28 v28.5.1
+	github.com/ignite/cli/v28 v28.8.2
 	go.uber.org/zap v1.27.0
 )
 
@@ -34,7 +34,7 @@ require (
 	4d63.com/gochecknoglobals v0.2.2 // indirect
 	cosmossdk.io/api v0.7.6 // indirect
 	cosmossdk.io/collections v0.4.0 // indirect
-	cosmossdk.io/core v0.11.1 // indirect
+	cosmossdk.io/core v0.11.2 // indirect
 	cosmossdk.io/depinject v1.1.0 // indirect
 	cosmossdk.io/log v1.4.1 // indirect
 	cosmossdk.io/store v1.1.1 // indirect
@@ -72,7 +72,6 @@ require (
 	github.com/bombsimon/wsl/v4 v4.6.0 // indirect
 	github.com/breml/bidichk v0.3.3 // indirect
 	github.com/breml/errchkjson v0.4.1 // indirect
-	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/butuzov/ireturn v0.3.1 // indirect
 	github.com/butuzov/mirror v1.3.0 // indirect
 	github.com/catenacyber/perfsprint v0.9.1 // indirect
@@ -87,6 +86,7 @@ require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/ckaznocha/intrange v0.3.1 // indirect
+	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240606204812-0bbfbd93a7ce // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
@@ -236,7 +236,7 @@ require (
 	github.com/polyfloyd/go-errorlint v1.7.1 // indirect
 	github.com/prometheus/client_golang v1.20.5 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.60.1 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/quasilyte/go-ruleguard v0.4.4 // indirect
 	github.com/quasilyte/go-ruleguard/dsl v0.3.22 // indirect
