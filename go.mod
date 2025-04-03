@@ -1,7 +1,6 @@
 module github.com/margined-protocol/locust-core
 
 go 1.24.2
-
 require (
 	cosmossdk.io/errors v1.0.1 // indirect
 	cosmossdk.io/math v1.4.0
@@ -25,7 +24,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/stretchr/testify v1.10.0
 	github.com/test-go/testify v1.1.4
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241209162323-e6fa225c2576
 	google.golang.org/grpc v1.70.0
 )
