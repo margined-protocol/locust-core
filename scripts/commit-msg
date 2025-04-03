@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Allowed types according to the spec
+TYPES="build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test"
+
+# Pattern to match a valid Conventional Commit message
+PATTERN="^(${TYPES})(\\([[:alnum:]_-]\\+\\))?!?: .\\+"
+
+COMMIT_MSG_FILE="$1"
+COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE")
+
+# Validate commit message
+if ! echo "$COMMIT_MSG" | grep -E "$PATTERN" > /dev/null 2>&1; then
+  echo "❌ Commit message does not follow Conventional Commits format."
+  echo ""
+  echo "Example: feat(parser): add ability to parse arrays"
+  echo "See https://www.conventionalcommits.org/en/v1.0.0/#summary for more details."
+  exit 1
+fi
+
+exit 0
