@@ -4,7 +4,7 @@
 TYPES="build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test"
 
 # Pattern to match a valid Conventional Commit message
-PATTERN="^(${TYPES})(\\([[:alnum:]_-]\\+\\))?!?: .\\+"
+PATTERN="^(${TYPES})(\\([[:alnum:]_-]+\\))?!?: .+"
 
 COMMIT_MSG_FILE="$1"
 COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE")
