@@ -1,12 +1,14 @@
 module github.com/margined-protocol/locust-core
 
 go 1.24.2
+
 require (
 	cosmossdk.io/errors v1.0.1 // indirect
 	cosmossdk.io/math v1.5.0
 	github.com/BurntSushi/toml v1.5.0
 	github.com/CosmWasm/wasmd v0.51.0
 	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/cinar/indicator/v2 v2.1.12
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-sdk v0.50.13
 	github.com/google/uuid v1.6.0

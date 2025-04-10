@@ -37,9 +37,6 @@ func NewClient(baseURL string, httpClient *http.Client) *Client {
 func (c *Client) FetchFundingRates(market, startDate, endDate string) ([]FundingRate, error) {
 	url := fmt.Sprintf("%s/funding-rates?market=%s&start_date=%s&end_date=%s", c.BaseURL, market, startDate, endDate)
 
-	// Print the URL for debugging
-	fmt.Println("Fetching funding rates from URL:", url)
-
 	var rates []FundingRate
 
 	// Define the operation to be retried

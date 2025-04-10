@@ -1,6 +1,11 @@
 package levana
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/cinar/indicator/v2/trend"
+)
 
 // FilterRates returns the last N funding rate entries
 func FilterRates(rates []FundingRate, n int) []FundingRate {
@@ -14,6 +19,42 @@ func FilterRates(rates []FundingRate, n int) []FundingRate {
 	}
 
 	return rates[len(rates)-n:]
+}
+
+func ComputeEMA(rates []FundingRate, period int) (float64, float64, error) {
+	if len(rates) < period {
+		return 0, 0, fmt.Errorf("not enough data for EMA: got %d, need at least %d", len(rates), period)
+	}
+
+	longStream := make(chan float64)
+	shortStream := make(chan float64)
+
+	emaLong := trend.NewEmaWithPeriod[float64](period)
+	emaShort := trend.NewEmaWithPeriod[float64](period)
+
+	outLong := emaLong.Compute(longStream)
+	outShort := emaShort.Compute(shortStream)
+
+	// feed values into channels
+	go func() {
+		defer close(longStream)
+		defer close(shortStream)
+
+		for _, r := range rates {
+			longVal, _ := strconv.ParseFloat(r.LongRate, 64)
+			shortVal, _ := strconv.ParseFloat(r.ShortRate, 64)
+			longStream <- longVal
+			shortStream <- shortVal
+		}
+	}()
+
+	var latestLong, latestShort float64
+	for i := 0; i < len(rates)-emaLong.IdlePeriod(); i++ {
+		latestLong = <-outLong
+		latestShort = <-outShort
+	}
+
+	return latestLong, latestShort, nil
 }
 
 // EstimateNextFundingRate predicts the next funding rate using a simple moving average
