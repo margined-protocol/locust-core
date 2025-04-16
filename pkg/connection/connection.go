@@ -209,7 +209,25 @@ func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string) (*rp
 	return client, client, nil
 }
 
-// InitCosmosClient initialises a cosmosclient for executing transactions - using auto gas estimation and prices
+// Define a simple retry function with exponential backoff
+func retry(attempts int, sleep time.Duration, logger *zap.Logger, fn func() error) error {
+	for i := 0; i < attempts; i++ {
+		err := fn()
+		if err == nil {
+			return nil
+		}
+
+		// Log the attempt and error
+		logger.Warn("Attempt failed", zap.Int("attempt", i+1), zap.Error(err))
+		time.Sleep(sleep)
+
+		// Exponential backoff
+		sleep *= 2
+	}
+	return fmt.Errorf("after %d attempts, last error: %s", attempts, "network error")
+}
+
+// InitCosmosClient initializes a Cosmos client with retry logic
 func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, key *types.SigningKey) (*cosmosclient.Client, error) {
 	opts := []cosmosclient.Option{
 		cosmosclient.WithNodeAddress(chain.RPCServerAddress),

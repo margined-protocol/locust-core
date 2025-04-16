@@ -5,27 +5,25 @@ import (
 	"encoding/json"
 	"fmt"
 
-	neutronfeetypes "github.com/margined-protocol/locust-core/pkg/proto/feerefunder/types"
-	neutrontransfertypes "github.com/margined-protocol/locust-core/pkg/proto/transfer/types"
-
-	sdkmath "cosmossdk.io/math"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	neutronfeetypes "github.com/margined-protocol/locust-core/pkg/proto/neutron/feerefunder/types"
+	neutrontransfertypes "github.com/margined-protocol/locust-core/pkg/proto/neutron/transfer/types"
+
+	sdkmath "cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// Connection manages IBC connections between chains
-type Connection struct {
-	Transfer      *Transfer
+// IBCConnection manages IBC connections between chains
+type IBCConnection struct {
+	Transfer      *IBCTransfer
 	SourcePrefix  string
 	DestPrefix    string
 	ForwardPrefix string
 }
 
-// Transfer represents an IBC connection between two chains
-type Transfer struct {
+// IBCTransfer represents an IBC connection between two chains
+type IBCTransfer struct {
 	SourceChainID string   // Chain ID of the source chain (e.g., "osmosis-1")
 	DestChainID   string   // Chain ID of the destination chain (e.g., "neutron-1")
 	Channel       string   // Channel ID on the source chain
@@ -171,7 +169,7 @@ func CreateTransferMsg(port, channel, memo, sender, receiver string, token sdk.C
 
 // CreateTransferWithMemo creates an IBC transfer message with a memo if forwarding
 func CreateTransferWithMemo(
-	conn *Transfer,
+	conn *IBCTransfer,
 	sourceChainID, destChainID string,
 	coin sdk.Coin,
 	blockHeight uint64,
@@ -220,15 +218,25 @@ func CreateTransferWithMemo(
 
 // createForwardMemo creates a properly formatted memo for IBC transfers based on connection type
 func CreateForwardMemo(
-	conn *Transfer,
+	conn *IBCTransfer,
 	receiver string,
-	_ string,
+	destChainID string,
 ) (string, string, error) {
+	// Validate inputs
+	if conn == nil {
+		return "", "", fmt.Errorf("connection configuration is nil")
+	}
+
 	var memo, finalReceiver string
 
 	// For forwarded IBC transfers (passing through an intermediary chain)
 	if conn.Forward != nil {
 		finalReceiver = conn.Forward.Receiver
+
+		// Validate forward receiver is not empty
+		if finalReceiver == "" {
+			return "", "", fmt.Errorf("forward receiver address is empty")
+		}
 
 		forwardInfo := ForwardInfo{
 			Channel:  conn.Forward.Channel,

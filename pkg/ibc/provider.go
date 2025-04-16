@@ -4,15 +4,17 @@ import (
 	"context"
 	"fmt"
 	"runtime"
+	"sync"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/utils"
-	"go.uber.org/zap"
-
-	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"go.uber.org/zap"
 )
 
 // DefaultTransferProvider implements the TransferProvider interface
@@ -25,9 +27,19 @@ type DefaultTransferProvider struct {
 
 	// Dependencies
 	clientRegistry *connection.ClientRegistry
-	ibcRegistry    *ConnectionRegistry
+	ibcRegistry    *IBCConnectionRegistry
 	msgHandler     MessageHandler
 	listeners      map[string]context.CancelFunc // Websocket listeners
+	mu             sync.Mutex                    // Protect maps from concurrent access
+}
+
+type transferData struct {
+	request       TransferRequest
+	result        TransferResult
+	sourceClient  *cosmosclient.Client
+	destClient    *cosmosclient.Client
+	sourceBalance sdk.Coin
+	destBalance   sdk.Coin
 }
 
 // NewTransferProvider creates a new IBC transfer provider
@@ -35,7 +47,6 @@ func NewTransferProvider(
 	logger *zap.Logger,
 	clientRegistry *connection.ClientRegistry,
 	baseChainID string,
-
 	signerAccount string,
 	msgHandler MessageHandler,
 ) TransferProvider {
@@ -44,7 +55,7 @@ func NewTransferProvider(
 		clientRegistry: clientRegistry,
 		baseChainID:    baseChainID,
 		signerAccount:  signerAccount,
-		ibcRegistry:    DefaultConnectionRegistry(),
+		ibcRegistry:    DefaultIBCConnectionRegistry(),
 		listeners:      make(map[string]context.CancelFunc),
 		msgHandler:     msgHandler,
 	}
@@ -73,6 +84,11 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 			return
 		}
 
+		// Ensure we have a valid initialBalance with Amount initialized
+		if initialBalance.Amount.IsNil() {
+			initialBalance = sdk.NewCoin(request.RecvDenom, sdkmath.ZeroInt())
+		}
+
 		// Poll balance every 10 seconds
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
@@ -87,6 +103,11 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 				currentBalance, err := p.queryBalance(ctx, request.DestinationChain, request.Receiver, request.RecvDenom)
 				if err != nil {
 					continue // Skip this iteration if query fails
+				}
+
+				// Ensure we have a valid currentBalance with Amount initialized
+				if currentBalance.Amount.IsNil() {
+					currentBalance = sdk.NewCoin(request.RecvDenom, sdkmath.ZeroInt())
 				}
 
 				// Calculate balance difference
@@ -118,11 +139,7 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 	if err != nil {
 		return fmt.Errorf("failed to create websocket client: %w", err)
 	}
-	defer func() {
-		if err := wsClient.Stop(); err != nil {
-			p.logger.Error("failed to stop websocket client", zap.Error(err))
-		}
-	}()
+	defer wsClient.Stop()
 
 	// Subscribe to receive_packet events
 	query := fmt.Sprintf("transfer.recipient = '%s'", request.Receiver)
@@ -144,20 +161,8 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 	}
 }
 
-// Transfer initiates an IBC transfer between chains
-func (p *DefaultTransferProvider) Transfer(ctx context.Context, request *TransferRequest) (*TransferResult, error) {
-	// Clear any previous instances
-	runtime.GC()
-
-	p.logger.Info("Transferring", zap.Any("request", request))
-	result := TransferResult{}
-
-	// Get the clients for source and destination chains
-	sourceClientInstance, err := p.clientRegistry.GetClient(request.SourceChain, false)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get source chain client: %w", err)
-	}
-
+// CreateTransferMsg prepares an IBC transfer message for the given request
+func (p *DefaultTransferProvider) CreateTransferMsg(ctx context.Context, request *TransferRequest) (sdk.Msg, error) {
 	// Assign receiver address for non-base chains
 	if request.DestinationChain != p.baseChainID {
 		_, receiver, err := p.clientRegistry.GetSignerAccountAndAddress(p.signerAccount, request.DestinationChain)
@@ -168,6 +173,98 @@ func (p *DefaultTransferProvider) Transfer(ctx context.Context, request *Transfe
 
 		request.Receiver = receiver
 	}
+
+	// Get the IBC connection for this transfer
+	conn, err := p.ibcRegistry.GetConnection(request.SourceChain, request.DestinationChain)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get IBC connection: %w", err)
+	}
+
+	chainID := request.SourceChain
+	if conn.Transfer.Forward != nil {
+		// Get account address for this chain
+		_, forwardReceiver, err := p.clientRegistry.GetSignerAccountAndAddress(p.signerAccount, conn.Transfer.Forward.ChainID)
+		if err != nil {
+			p.logger.Error("Failed to get address for chain", zap.String("chain", conn.Transfer.Forward.ChainID), zap.Error(err))
+			return nil, err
+		}
+
+		chainID = conn.Transfer.Forward.ChainID
+		conn.Transfer.Forward.Receiver = forwardReceiver
+
+		p.logger.Info("Forward receiver", zap.String("chain", conn.Transfer.Forward.ChainID), zap.String("receiver", forwardReceiver))
+	}
+
+	// Get source chain block height
+	blockHeight, err := p.clientRegistry.GetHeight(ctx, chainID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get source chain height: %w", err)
+	}
+
+	// Prepare timeout height
+	timeout := uint64(*blockHeight) + request.Timeout
+
+	p.logger.Info("Creating transfer message", zap.Any("request", request))
+
+	// Create transfer message
+	transferMsg, err := CreateTransferWithMemo(
+		conn.Transfer,
+		request.SourceChain,
+		request.DestinationChain,
+		request.Amount,
+		timeout,
+		request.Sender,
+		request.Receiver,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create transfer message: %w", err)
+	}
+
+	p.logger.Info("Transfer message", zap.Any("message", transferMsg))
+	return transferMsg, nil
+}
+
+// ProcessTransferMsg sends the transfer message and waits for confirmation if needed
+func (p *DefaultTransferProvider) ProcessTransferMsg(ctx context.Context, request *TransferRequest, transferMsg sdk.Msg) (*TransferResult, error) {
+	result := TransferResult{}
+
+	// Send the message
+	p.logger.Info("Sending IBC transfer",
+		zap.String("source", request.SourceChain),
+		zap.String("destination", request.DestinationChain),
+		zap.String("amount", request.Amount.String()),
+	)
+
+	response, err := p.msgHandler(request.SourceChain, []sdk.Msg{transferMsg}, false, true)
+	if err != nil {
+		return &TransferResult{Error: err}, err
+	}
+
+	// Update transfer data with source transaction result
+	result.SourceTxHash = response.TxHash
+	result.SourceResponse = response
+
+	// If requested, wait for the receive packet event
+	// Create a context with timeout if specified
+	waitCtx := ctx
+	var cancel context.CancelFunc
+	waitCtx, cancel = context.WithTimeout(ctx, 6*time.Minute)
+	defer cancel()
+
+	err = p.waitForReceivePacket(waitCtx, request)
+	if err != nil {
+		p.logger.Warn("Failed to wait for receive packet", zap.Error(err))
+	}
+
+	return &result, nil
+}
+
+// Transfer initiates an IBC transfer between chains
+func (p *DefaultTransferProvider) Transfer(ctx context.Context, request *TransferRequest) (*TransferResult, error) {
+	// Clear any previous instances
+	runtime.GC()
+
+	p.logger.Info("Transferring", zap.Any("request", request))
 
 	// Get source balance before transfer
 	sourceBalance, err := p.queryBalance(ctx, request.SourceChain, request.Sender, request.Amount.Denom)
@@ -199,92 +296,14 @@ func (p *DefaultTransferProvider) Transfer(ctx context.Context, request *Transfe
 	}
 	p.logger.Info("Destination balance", zap.Any("balance", destBalance))
 
-	// Get the IBC connection for this transfer
-	conn, err := p.ibcRegistry.GetConnection(request.SourceChain, request.DestinationChain)
+	// Create the transfer message
+	transferMsg, err := p.CreateTransferMsg(ctx, request)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get IBC connection: %w", err)
+		return nil, err
 	}
 
-	chainID := request.SourceChain
-	if conn.Transfer.Forward != nil {
-		// Get account address for this chain
-		_, forwardReceiver, err := p.clientRegistry.GetSignerAccountAndAddress(p.signerAccount, conn.Transfer.Forward.ChainID)
-		if err != nil {
-			p.logger.Error("Failed to get address for chain", zap.String("chain", conn.Transfer.Forward.ChainID), zap.Error(err))
-			return nil, err
-		}
-
-		chainID = conn.Transfer.Forward.ChainID
-		conn.Transfer.Forward.Receiver = forwardReceiver
-	}
-
-	// Get source chain block height
-	blockHeight, err := p.clientRegistry.GetHeight(ctx, chainID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get source chain height: %w", err)
-	}
-
-	// Prepare timeout height
-	// nolint
-	timeout := uint64(*blockHeight) + request.Timeout
-
-	// Get the account and sender address with correct prefix
-	account, sender, err := connection.GetSignerAccountAndAddress(
-		sourceClientInstance.Client,
-		p.signerAccount,
-		sourceClientInstance.Chain.Prefix,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get signer account and address: %w", err)
-	}
-
-	sdkaddr, _ := account.Record.GetAddress()
-	p.logger.Info("Sender", zap.String("sender", sender))
-	p.logger.Info("Account", zap.String("account", sdkaddr.String()))
-
-	// Create transfer message
-	transferMsg, err := CreateTransferWithMemo(
-		conn.Transfer,
-		request.SourceChain,
-		request.DestinationChain,
-		request.Amount,
-		timeout,
-		request.Sender,
-		request.Receiver,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create transfer message: %w", err)
-	}
-
-	p.logger.Info("Transfer message", zap.Any("message", transferMsg))
-
-	// Send the message
-	p.logger.Info("Sending IBC transfer",
-		zap.String("source", request.SourceChain),
-		zap.String("destination", request.DestinationChain),
-		zap.String("amount", request.Amount.String()),
-	)
-
-	response, err := p.msgHandler(request.SourceChain, []sdk.Msg{transferMsg}, false, true)
-	if err != nil {
-		return &TransferResult{Error: err}, err
-	}
-
-	// Update transfer data with source transaction result
-	result.SourceTxHash = response.TxHash
-	result.SourceResponse = response
-
-	// If requested, wait for the receive packet event
-	// Create a context with timeout if specified
-	waitCtx, cancel := context.WithTimeout(ctx, 6*time.Minute)
-	defer cancel()
-
-	err = p.waitForReceivePacket(waitCtx, request)
-	if err != nil {
-		p.logger.Warn("Failed to wait for receive packet", zap.Error(err))
-	}
-
-	return &result, nil
+	// Process the transfer message
+	return p.ProcessTransferMsg(ctx, request, transferMsg)
 }
 
 // queryBalance queries the balance of an address on a specific chain
@@ -299,12 +318,14 @@ func (p *DefaultTransferProvider) queryBalance(ctx context.Context, chainID, add
 		return sdk.Coin{}, err
 	}
 
+	p.logger.Info("Coins", zap.Any("coins", coins))
+
 	for _, coin := range coins {
 		if coin.Denom == denom {
 			return coin, nil
 		}
 	}
 
-	// Return zero amount if denom not found
-	return sdk.Coin{}, nil
+	// Return zero amount with provided denom if not found
+	return sdk.NewCoin(denom, sdkmath.ZeroInt()), nil
 }

@@ -3,16 +3,14 @@ package redbank
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	sdkmath "cosmossdk.io/math"
 )
 
 func TestMarketValidation(t *testing.T) {
 	// Valid market
 	market := NewMarket("uatom")
-	// nolint
 	market.ReserveFactor = "0.2"
 	market.InterestRateModel = InterestRateModel{
 		OptimalUtilizationRate: "0.8",

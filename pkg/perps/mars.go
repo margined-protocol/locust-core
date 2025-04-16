@@ -8,10 +8,10 @@ import (
 	abcitypes "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/margined-protocol/locust/core/pkg/contracts/mars/creditmanager"
-	marsperps "github.com/margined-protocol/locust/core/pkg/contracts/mars/perps"
-	"github.com/margined-protocol/locust/core/pkg/ibc"
-	"github.com/margined-protocol/locust/core/pkg/types"
+	"github.com/margined-protocol/locust-core/pkg/contracts/mars/creditmanager"
+	marsperps "github.com/margined-protocol/locust-core/pkg/contracts/mars/perps"
+	"github.com/margined-protocol/locust-core/pkg/ibc"
+	"github.com/margined-protocol/locust-core/pkg/types"
 	"go.uber.org/zap"
 )
 

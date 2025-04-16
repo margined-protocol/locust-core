@@ -6,7 +6,7 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	abcitypes "github.com/cometbft/cometbft/abci/types"
-	"github.com/margined-protocol/locust/core/pkg/math"
+	"github.com/margined-protocol/locust-core/pkg/math"
 )
 
 func ProcessMarsPerpEvent(events []abcitypes.Event) (currentPrice string, entryPrice string, err error) {

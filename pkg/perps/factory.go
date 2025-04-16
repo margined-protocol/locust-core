@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/margined-protocol/locust/core/pkg/connection"
-	"github.com/margined-protocol/locust/core/pkg/contracts/mars/creditmanager"
-	marsperps "github.com/margined-protocol/locust/core/pkg/contracts/mars/perps"
-	"github.com/margined-protocol/locust/core/pkg/ibc"
-	subaccounts "github.com/margined-protocol/locust/core/pkg/proto/dydx/subaccounts/types"
-	"github.com/margined-protocol/locust/core/pkg/types"
+	"github.com/margined-protocol/locust-core/pkg/connection"
+	"github.com/margined-protocol/locust-core/pkg/contracts/mars/creditmanager"
+	marsperps "github.com/margined-protocol/locust-core/pkg/contracts/mars/perps"
+	"github.com/margined-protocol/locust-core/pkg/ibc"
+	subaccounts "github.com/margined-protocol/locust-core/pkg/proto/dydx/subaccounts/types"
+	"github.com/margined-protocol/locust-core/pkg/types"
 	"go.uber.org/zap"
 )
 

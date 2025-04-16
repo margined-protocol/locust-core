@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"sync"
 
+	sdkmath "cosmossdk.io/math"
+
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/margined-protocol/locust-core/pkg/grpc"
 	"github.com/margined-protocol/locust-core/pkg/types"
 	"github.com/margined-protocol/locust-core/pkg/utils"
 	"go.uber.org/zap"
-
-	sdkmath "cosmossdk.io/math"
-
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 // ClientEntry represents a registered chain with its client and configuration
@@ -48,7 +48,7 @@ func NewClientRegistry(logger *zap.Logger, signerAccount string) *ClientRegistry
 }
 
 // RegisterClient adds a new chain client to the registry
-func (r *ClientRegistry) RegisterClient(_ context.Context, _ *zap.Logger, chain *types.Chain, key *types.SigningKey) error {
+func (r *ClientRegistry) RegisterClient(ctx context.Context, logger *zap.Logger, chain *types.Chain, key *types.SigningKey) error {
 	if _, exists := r.chains[chain.ChainID]; exists {
 		return fmt.Errorf("chain %s already registered", chain.ChainID)
 	}
