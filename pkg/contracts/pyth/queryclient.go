@@ -76,7 +76,6 @@ func (q *queryClient) LatestPrice(ctx context.Context, id string) (*PriceRespons
 
 	// Construct the full URL by appending the ID to the base URL
 	apiURL := fmt.Sprintf("%s&ids%%5B%%5D=%s", baseURL, id)
-	fmt.Println(apiURL)
 
 	exponentialBackoff := locustbackoff.NewBackoff(ctx)
 
