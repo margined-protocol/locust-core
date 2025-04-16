@@ -47,7 +47,7 @@ type IndexerAssetPosition struct {
 	Size             string `json:"size"`
 	Symbol           string `json:"symbol"`
 	Side             string `json:"side"`
-	AssetID          string `json:"assetId"`
+	AssetId          string `json:"assetId"`
 	SubaccountNumber int    `json:"subaccountNumber"`
 }
 

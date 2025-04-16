@@ -9,23 +9,21 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
-	"github.com/margined-protocol/locust-core/pkg/connection"
-	"github.com/margined-protocol/locust-core/pkg/grpc"
-	"github.com/margined-protocol/locust-core/pkg/ibc"
-	"github.com/margined-protocol/locust-core/pkg/math"
-	clob "github.com/margined-protocol/locust-core/pkg/proto/clob/types"
-	send "github.com/margined-protocol/locust-core/pkg/proto/sending/types"
-	subaccounts "github.com/margined-protocol/locust-core/pkg/proto/subaccounts/types"
-	"go.uber.org/zap"
-
 	sdkmath "cosmossdk.io/math"
-
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
+	"github.com/margined-protocol/locust/core/pkg/connection"
+	"github.com/margined-protocol/locust/core/pkg/grpc"
+	"github.com/margined-protocol/locust/core/pkg/ibc"
+	"github.com/margined-protocol/locust/core/pkg/math"
+	clob "github.com/margined-protocol/locust/core/pkg/proto/dydx/clob/types"
+	send "github.com/margined-protocol/locust/core/pkg/proto/dydx/sending/types"
+	subaccounts "github.com/margined-protocol/locust/core/pkg/proto/dydx/subaccounts/types"
 
-	abcitypes "github.com/cometbft/cometbft/abci/types"
+	"go.uber.org/zap"
 )
 
 const (
@@ -40,13 +38,14 @@ const (
 type DydxProvider struct {
 	logger                    *zap.Logger
 	BaseChainID               string
-	assetID                   uint32 // USDC == 0
-	marketID                  uint32
-	subaccountID              uint32
+	assetId                   uint32 // USDC == 0
+	marketId                  uint32
+	subaccountId              uint32
 	market                    string
 	denom                     string
 	atomicResolution          int64  // Decimal places for the amount, -6 == 6dp
 	quantumConversionExponent int64  // Decimal places for the price, -9 == 9dp
+	decimals                  int64  // Decimal places for the asset used externally
 	stepBaseQuantums          uint64 // MinQuantityTickSize
 	subticksPerTick           uint64 // MinPriceTickSize
 	minEquity                 sdkmath.Int
@@ -89,6 +88,7 @@ type DydxConfig struct {
 
 	QuantumConversionExp int64
 	AtomicResolution     int64
+	Decimals             int64
 }
 
 // NewDydxProvider creates a new Dydx provider
@@ -97,17 +97,19 @@ func NewDydxProvider(
 	logger *zap.Logger,
 
 	// Market configuration
-	marketID uint32,
+	marketId uint32,
 	market string,
 	subticksPerTick uint64,
 	stepBaseQuantums uint64,
 	quantumConversionExponent int64,
 	atomicResolution int64,
+	decimals int64,
 	minEquity sdkmath.Int,
+
 	// Account configuration
 	signerAccount string,
 	executor string,
-	subaccountID uint32,
+	subaccountId uint32,
 	denom string,
 
 	// Chain configuration
@@ -138,7 +140,7 @@ func NewDydxProvider(
 		logger: logger,
 
 		// Market configuration
-		marketID:                  marketID,
+		marketId:                  marketId,
 		market:                    market,
 		subticksPerTick:           subticksPerTick,
 		stepBaseQuantums:          stepBaseQuantums,
@@ -146,10 +148,12 @@ func NewDydxProvider(
 		atomicResolution:          atomicResolution,
 		slippage:                  DefaultSlippage,
 		minEquity:                 minEquity,
+		decimals:                  decimals,
+
 		// Account configuration
 		signerAccount: signerAccount,
 		executor:      executor,
-		subaccountID:  subaccountID,
+		subaccountId:  subaccountId,
 		denom:         denom,
 
 		// Chain configuration
@@ -166,7 +170,7 @@ func NewDydxProvider(
 }
 
 // Initialize implements Provider
-func (m *DydxProvider) Initialize(_ context.Context) error {
+func (m *DydxProvider) Initialize(ctx context.Context) error {
 	// Dydx clients should already be initialized at construction
 	return nil
 }
@@ -180,7 +184,7 @@ func (m *DydxProvider) GetPosition(ctx context.Context) (*Position, error) {
 	}
 
 	// Query subaccount information from indexer first
-	result, err := m.QuerySubaccountIndexer(ctx, account, m.subaccountID)
+	result, err := m.QuerySubaccountIndexer(ctx, account, m.subaccountId)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching indexer data: %w", err)
 	}
@@ -190,12 +194,12 @@ func (m *DydxProvider) GetPosition(ctx context.Context) (*Position, error) {
 		return nil, fmt.Errorf("error fetching candle prices: %w", err)
 	}
 
-	position, err := ProcessIndexerResponse(m.market, m.quantumConversionExponent, m.atomicResolution, result)
+	position, err := ProcessIndexerResponse(m.market, m.decimals, result)
 	if err != nil {
 		return nil, fmt.Errorf("error processing indexer data: %w", err)
 	}
 
-	currentPrice, err := ProcessCandlesResponse(m.market, m.quantumConversionExponent, m.atomicResolution, candles)
+	currentPrice, err := ProcessCandlesResponse(m.market, candles)
 	if err != nil {
 		return nil, fmt.Errorf("error processing candle prices: %w", err)
 	}
@@ -203,17 +207,18 @@ func (m *DydxProvider) GetPosition(ctx context.Context) (*Position, error) {
 	position.CurrentPrice = *currentPrice
 
 	return position, nil
+
 }
 
 // CheckSubaccount implements Provider
-func (m *DydxProvider) CheckSubaccount(_ string) (bool, error) {
+func (m *DydxProvider) CheckSubaccount(account string) (bool, error) {
 	// No need to check subaccount they exist by default
 	return true, nil
 }
 
 // GetSubaccount implements Provider
 func (m *DydxProvider) GetSubaccount() string {
-	return fmt.Sprintf("%d", m.subaccountID)
+	return fmt.Sprintf("%d", m.subaccountId)
 }
 
 // GetProviderDenom implements Provider
@@ -267,30 +272,37 @@ func (m *DydxProvider) GetAccountBalance() (sdk.Coins, error) {
 
 // GetSubaccountBalance implements Provider
 func (m *DydxProvider) GetSubaccountBalance() (sdk.Coins, error) {
-	_, signer, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
+	_, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := m.subaccountClient.Subaccount(context.Background(), &subaccounts.QueryGetSubaccountRequest{
-		Owner:  signer,
-		Number: m.subaccountID,
-	})
+	// Query subaccount information from indexer first
+	result, err := m.QuerySubaccountIndexer(context.Background(), account, m.subaccountId)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error fetching indexer data: %w", err)
 	}
 
-	coins := make(sdk.Coins, len(res.Subaccount.AssetPositions))
-	for i, assetPosition := range res.Subaccount.AssetPositions {
-		// THIS ASSUMES USDC IS THE ONLY ASSET and no clue if quantums is correct at all.
-		coins[i] = sdk.NewCoin(m.denom, sdkmath.NewIntFromBigInt(assetPosition.Quantums.BigInt()))
+	// We use equity as a proxy for the subaccount balance
+	equity := result.Subaccount.Equity
+
+	// Parse the equity string into a decimal
+	equityDec, err := sdkmath.LegacyNewDecFromStr(equity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse equity value %s: %w", equity, err)
 	}
+
+	// Convert to integer with 6 decimals precision (assuming USDC)
+	equityInt := equityDec.MulInt64(1_000_000).TruncateInt()
+
+	coins := sdk.NewCoins(sdk.NewCoin(m.denom, equityInt))
 
 	return coins, nil
 }
 
 // CreateMarketOrder implements Provider
-func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, _, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
+func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, margin, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
+
 	_, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
 	if err != nil {
 		return nil, err
@@ -343,7 +355,7 @@ func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, _, size sdk
 				SubaccountId: subaccounts.SubaccountId{
 					Owner: account,
 				},
-				ClobPairId: m.marketID,
+				ClobPairId: m.marketId,
 				OrderFlags: 0, // 0 short-term, 32 conditional, 64 long-term
 			},
 			Side:       clob.Order_Side(side),
@@ -367,7 +379,7 @@ func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, _, size sdk
 }
 
 // CreateLimitOrder implements Provider
-func (m *DydxProvider) CreateLimitOrder(_ context.Context, price, _, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
+func (m *DydxProvider) CreateLimitOrder(ctx context.Context, price, margin, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
 	_, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
 	if err != nil {
 		return nil, err
@@ -417,7 +429,7 @@ func (m *DydxProvider) CreateLimitOrder(_ context.Context, price, _, size sdkmat
 				SubaccountId: subaccounts.SubaccountId{
 					Owner: account,
 				},
-				ClobPairId: m.marketID,
+				ClobPairId: m.marketId,
 				OrderFlags: 64, // 0 short-term, 32 conditional, 64 long-term
 			},
 			Side:       clob.Order_Side(side),
@@ -440,7 +452,7 @@ func (m *DydxProvider) CreateLimitOrder(_ context.Context, price, _, size sdkmat
 }
 
 // DepositSubaccount implements Provider
-func (m *DydxProvider) DepositSubaccount(_ context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
+func (m *DydxProvider) DepositSubaccount(ctx context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
 	// Validate non-zero amount
 	if amount.IsZero() {
 		m.logger.Info("Skipping deposit for zero amount")
@@ -456,47 +468,51 @@ func (m *DydxProvider) DepositSubaccount(_ context.Context, amount sdkmath.Int) 
 		Sender: account,
 		Recipient: subaccounts.SubaccountId{
 			Owner:  account,
-			Number: m.subaccountID,
+			Number: m.subaccountId,
 		},
-		AssetId:  m.assetID,
+		AssetId:  m.assetId,
 		Quantums: amount.Uint64(),
 	}
 	return []sdk.Msg{&deposit}, nil
 }
 
 // WithdrawSubaccount implements Provider
-func (m *DydxProvider) WithdrawSubaccount(_ context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
-	// Validate non-zero amount
+func (m *DydxProvider) WithdrawSubaccount(ctx context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
+	// Validate non-zero amount early
 	if amount.IsZero() {
 		m.logger.Info("Skipping withdrawal for zero amount")
 		return nil, nil
 	}
 
+	// Get subaccount balance
 	balance, err := m.GetSubaccountBalance()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get subaccount balance: %w", err)
 	}
 
-	// Get the USDC balance amount
-	var usdcBalance sdkmath.Int
+	// Find USDC balance
+	equity := sdkmath.ZeroInt()
 	for _, coin := range balance {
 		if coin.Denom == m.denom {
-			usdcBalance = coin.Amount
+			equity = coin.Amount
 			break
 		}
 	}
 
-	// Calculate maximum withdrawal that maintains minimum equity
-	maxWithdrawal := usdcBalance.Sub(m.minEquity)
+	// Equity is the sum of the margin and the USDC balance, noting that margin is USDC
+	m.logger.Info("Equity", zap.Any("equity", equity))
+
+	// Calculate maximum withdrawal amount
+	maxWithdrawal := equity.Sub(m.minEquity)
 	if maxWithdrawal.IsNegative() {
 		m.logger.Warn("Cannot withdraw: balance below minimum equity",
-			zap.String("balance", usdcBalance.String()),
+			zap.String("balance", equity.String()),
 			zap.String("min_equity", m.minEquity.String()),
 		)
 		return nil, nil
 	}
 
-	// If requested amount is too large, adjust it
+	// Adjust withdrawal amount if needed
 	if amount.GT(maxWithdrawal) {
 		m.logger.Warn("Adjusting withdrawal amount to maintain minimum equity",
 			zap.String("requested", amount.String()),
@@ -505,40 +521,71 @@ func (m *DydxProvider) WithdrawSubaccount(_ context.Context, amount sdkmath.Int)
 		amount = maxWithdrawal
 	}
 
-	_, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
-	if err != nil {
-		return nil, err
+	// Skip if nothing to withdraw after adjustment
+	if amount.IsZero() {
+		m.logger.Info("Skipping withdrawal: adjusted amount is zero")
+		return nil, nil
 	}
 
-	withdraw := send.MsgWithdrawFromSubaccount{
+	// Get signer account address
+	_, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get signer account: %w", err)
+	}
+
+	// Create withdrawal message
+	withdraw := &send.MsgWithdrawFromSubaccount{
 		Sender: subaccounts.SubaccountId{
 			Owner:  account,
-			Number: m.subaccountID,
+			Number: m.subaccountId,
 		},
 		Recipient: account,
-		AssetId:   m.assetID,
+		AssetId:   m.assetId,
 		Quantums:  amount.Uint64(),
 	}
 
-	return []sdk.Msg{&withdraw}, nil
+	return []sdk.Msg{withdraw}, nil
 }
 
 // GetLiquidationPrice implements Provider
-// nolint
 func (m *DydxProvider) GetLiquidationPrice(equity, size, entryPrice, maintenanceMargin sdkmath.LegacyDec) sdkmath.LegacyDec {
-	// Your existing liquidation price calculation
-	return sdkmath.LegacyZeroDec() // Replace with actual calculation
+	// If no position, return zero
+	if size.IsZero() {
+		return sdkmath.LegacyZeroDec()
+	}
+
+	// Calculate liquidation price using the formula:
+	// p' = (e - s * p) / (|s| * MMF - s)
+
+	// Calculate numerator: (e - s * p)
+	numerator := equity.Sub(size.Mul(entryPrice))
+
+	// Calculate denominator: (|s| * MMF - s)
+	denominator := size.Abs().Mul(maintenanceMargin).Sub(size)
+
+	// Handle division by zero
+	if denominator.IsZero() {
+		return sdkmath.LegacyZeroDec()
+	}
+
+	// Calculate the liquidation price
+	liquidationPrice := numerator.Quo(denominator)
+
+	// Ensure liquidation price is not negative
+	if liquidationPrice.IsNegative() {
+		return sdkmath.LegacyZeroDec()
+	}
+
+	return liquidationPrice
 }
 
 // ProcessPerpEvent implements Provider
 func (m *DydxProvider) ProcessPerpEvent(_ []abcitypes.Event) (currentPrice string, entryPrice string, err error) {
 	// Get fills from indexer
-	fills, err := m.QueryFillsIndexer(context.Background(), m.executor, m.subaccountID)
+	fills, err := m.QueryFillsIndexer(context.Background(), m.executor, m.subaccountId)
 	if err != nil {
 		return "", "", fmt.Errorf("error fetching fills: %w", err)
 	}
-
-	m.logger.Info("Fills", zap.Any("fills", fills))
 
 	// Check if fills response is empty
 	if fills == nil || len(fills.Fills) == 0 {
@@ -582,13 +629,17 @@ func (m *DydxProvider) ProcessPerpEvent(_ []abcitypes.Event) (currentPrice strin
 }
 
 // CreateSubaccount implements Provider
-// nolint
 func (m *DydxProvider) CreateSubaccount(account string) (sdk.Msg, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
 // Helper functions
 func (m *DydxProvider) IncreasePosition(ctx context.Context, price float64, amount, margin sdkmath.Int, isLong bool) (*ExecutionResult, error) {
+	// Validate margin is not negative
+	if margin.IsNegative() {
+		return nil, fmt.Errorf("margin cannot be negative")
+	}
+
 	// High level-logic:
 	// 1. Create a deposit message
 	// 2. Create a place order message
@@ -601,12 +652,13 @@ func (m *DydxProvider) IncreasePosition(ctx context.Context, price float64, amou
 	}
 
 	// 2. Send the messages - MsgPlaceOrder, MsgCancel, MsgBatchCancel cannot have multiple messages in a single tx
-	depositTx, err := m.msgHandler(DydxChainID, depositMsgs, false, false)
-	if err != nil {
-		return nil, err
+	if depositMsgs != nil {
+		depositTx, err := m.msgHandler(DydxChainID, depositMsgs, false, false)
+		if err != nil {
+			return nil, err
+		}
+		m.logger.Info("Deposit transaction", zap.Any("tx", depositTx.TxHash))
 	}
-
-	m.logger.Info("Deposit transaction", zap.Any("tx", depositTx.TxHash))
 
 	adjustedPrice := math.AdjustSlippageFloat64(price, m.slippage, isLong)
 	quantumPrice := math.FloatToQuantumPrice(adjustedPrice, m.quantumConversionExponent)
@@ -631,20 +683,37 @@ func (m *DydxProvider) IncreasePosition(ctx context.Context, price float64, amou
 	}
 
 	var orderTx *cosmosclient.Response
-	// 3. Send the messages
+	// 3. Send the messages with retry mechanism
 	if orderMsgs != nil {
-		var err error
-		orderTx, err = m.msgHandler(DydxChainID, orderMsgs, true, false)
-		if err != nil {
-			return nil, err
-		}
+		maxRetries := 3
+		for attempt := 1; attempt <= maxRetries; attempt++ {
+			var err error
+			orderTx, err = m.msgHandler(DydxChainID, orderMsgs, true, false)
+			if err != nil {
+				return nil, err
+			}
 
-		m.logger.Info("Order transaction", zap.Any("tx", orderTx.TxHash))
+			m.logger.Info("Order transaction", zap.Any("tx", orderTx.TxHash), zap.Int("attempt", attempt))
 
-		// Verify the position change
-		err = verifyPositionChange(ctx, m.logger, m, initialPosition, amount)
-		if err != nil {
-			return nil, fmt.Errorf("failed to verify position increase: %w", err)
+			// Verify the position change
+			err = verifyPositionChange(ctx, m.logger, m, initialPosition, amount)
+			if err == nil {
+				// Success - position verified
+				break
+			}
+
+			if attempt < maxRetries {
+				m.logger.Warn("Position verification failed, retrying...",
+					zap.Int("attempt", attempt),
+					zap.Int("max_retries", maxRetries),
+					zap.Error(err))
+				// Wait a bit before retrying
+				time.Sleep(time.Second * 2)
+				continue
+			}
+
+			// If we've exhausted all retries, return the error
+			return nil, fmt.Errorf("failed to verify position increase after %d attempts: %w", maxRetries, err)
 		}
 	}
 
@@ -690,6 +759,7 @@ func (m *DydxProvider) ReducePosition(ctx context.Context, price float64, amount
 
 	// 2. Send the messages
 	if orderMsgs != nil {
+		m.logger.Info("Sending short term order")
 		err = m.sendShortTermOrder(ctx, client.Client, account, orderMsgs, amount.Neg())
 		if err != nil {
 			return nil, err
@@ -723,14 +793,13 @@ func (m *DydxProvider) ReducePosition(ctx context.Context, price float64, amount
 	}
 
 	return result, nil
+
 }
 
-// nolint
 func (m *DydxProvider) ClosePosition(ctx context.Context, isLong bool) (*ExecutionResult, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-// nolint
 func (m *DydxProvider) AdjustMargin(ctx context.Context, margin sdkmath.Int, isAdd bool) (*ExecutionResult, error) {
 	return nil, fmt.Errorf("not implemented")
 }
