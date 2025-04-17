@@ -25,8 +25,9 @@ var _ QueryClient = (*queryClient)(nil)
 
 // NewQueryClient creates a new QueryClient
 func NewQueryClient(conn *grpc.ClientConn, contractAddress string) QueryClient {
+	baseQueryClient := base.NewQueryClient(conn)
 	return &queryClient{
-		baseQueryClient: base.QueryClient{},
+		baseQueryClient: *baseQueryClient,
 		cc:              conn,
 		address:         contractAddress,
 	}

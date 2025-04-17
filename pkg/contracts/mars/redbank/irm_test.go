@@ -3,10 +3,9 @@ package redbank
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	sdkmath "cosmossdk.io/math"
 )
 
 func TestInterestRateModelValidation(t *testing.T) {
@@ -98,7 +97,6 @@ func TestInterestRatesCalculation(t *testing.T) {
 
 	// Test case 4: current utilization rate == 100% and optimal utilization rate == 100%
 	t.Run("utilization rate == 100% and optimal == 100%", func(t *testing.T) {
-		t.Skip("skipping: test failing")
 		model := InterestRateModelRational{
 			OptimalUtilizationRate: sdkmath.LegacyMustNewDecFromStr("1.0"),
 			Base:                   sdkmath.LegacyZeroDec(),

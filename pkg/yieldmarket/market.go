@@ -2,8 +2,11 @@ package yieldmarket
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	sdkmath "cosmossdk.io/math"
+	"go.uber.org/zap"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -45,4 +48,22 @@ type YieldMarket interface {
 
 	// TransferFunds executes a transfer
 	TransferFunds(ctx context.Context, source, destination, receiver string, amount sdkmath.Int) []sdk.Msg
+}
+
+// Retry function with exponential backoff
+func retry(attempts int, sleep time.Duration, logger zap.Logger, fn func() error) error {
+	for i := range make([]struct{}, attempts) {
+		err := fn()
+		if err == nil {
+			return nil
+		}
+
+		// Log the attempt and error
+		logger.Info("Attempt failed", zap.Int("attempt", i+1), zap.Error(err))
+		time.Sleep(sleep)
+
+		// Exponential backoff
+		sleep *= 2
+	}
+	return fmt.Errorf("after %d attempts, last error: %s", attempts, "network error")
 }

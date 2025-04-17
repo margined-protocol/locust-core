@@ -50,6 +50,27 @@ func GenerateDeviation(baseValue float64, rng *rand.Rand) int64 {
 	return deviation
 }
 
+// interpolate linearly interpolates between two points (x1,y1) and (x2,y2)
+// to find the y-value corresponding to the provided x-value
+func Interpolate(
+	x, x1, y1, x2, y2 sdkmath.LegacyDec,
+) sdkmath.LegacyDec {
+	// If x2 == x1, return y1 to avoid division by zero
+	if x2.Equal(x1) {
+		return y1
+	}
+
+	// Linear interpolation formula: y = y1 + (x - x1) * (y2 - y1) / (x2 - x1)
+	return y1.Add(
+		x.Sub(x1).Mul(
+			y2.Sub(y1),
+		).Quo(
+			x2.Sub(x1),
+		),
+	)
+
+}
+
 // RoundToNearestTickSpacing rounds a value to the nearest multiple of r.
 func RoundToNearestTickSpacing(value, r int64) (int64, error) {
 	if r <= 0 {
@@ -89,6 +110,20 @@ func ParseCoinString(token string, denom string, decimals int) (*big.Float, erro
 func FloatToLegacyDec(value float64) sdkmath.LegacyDec {
 	strValue := fmt.Sprintf("%.18f", value) // Convert to string with 18 decimal places
 	return sdkmath.LegacyMustNewDecFromStr(strValue)
+}
+
+// FloatToQuantumPrice converts a floating point price to a quantum-adjusted fixed-point integer
+// Example: floatToQuantumPrice(1.234567899, -9) returns sdkmath.NewInt(1234567899)
+func FloatToFixedInt(price float64, decimals int64) sdkmath.Int {
+	// Convert the negative exponent to a positive multiplier
+	// e.g., 6 becomes 1_000_000
+	multiplier := math.Pow10(int(decimals))
+
+	// Multiply the price by the multiplier and round to nearest integer
+	fixedInt := math.Round(price * multiplier)
+
+	// Convert to sdkmath.Int
+	return sdkmath.NewInt(int64(fixedInt))
 }
 
 // FloatToQuantumPrice converts a floating point price to a quantum-adjusted fixed-point integer
@@ -160,9 +195,35 @@ func CalculatePriceFromCoins(base, baseDenom string, baseDecimals int, quote, qu
 	return price, nil
 }
 
+// DivideWithDecimals divides a big.Int by a float64 considering the decimals
+// and returns the result as a fixed-point big.Int with the specified decimals.
+func DivideWithDecimals(f float64, b *big.Int, decimals int) *big.Int {
+	scaleFactor := new(big.Float).SetFloat64(math.Pow(10, float64(decimals)))
+
+	// Convert big.Int to big.Float
+	bigB := new(big.Float).SetInt(b)
+
+	bigB.Quo(bigB, scaleFactor)
+
+	// Convert float64 to big.Float
+	bigF := new(big.Float).SetFloat64(f)
+
+	// Perform the division
+	divided := new(big.Float).Quo(bigB, bigF)
+
+	// Adjust for decimals
+	divided.Mul(divided, scaleFactor)
+
+	// Convert the result back to big.Int
+	result := new(big.Int)
+	divided.Int(result)
+
+	return result
+}
+
 // MultiplyWithDecimals multiplies a float64 and a big.Int considering the decimals
 // and returns the result as a fixed-point big.Int with the specified decimals.
-func MultiplyWithDecimals(f float64, b *big.Int, _ int) *big.Int {
+func MultiplyWithDecimals(f float64, b *big.Int, decimals int) *big.Int {
 	// Convert float64 to big.Float
 	bigF := new(big.Float).SetFloat64(f)
 
@@ -214,9 +275,10 @@ func ConvertDecimalsSDK(value sdkmath.Int, fromDecimals, toDecimals int) sdkmath
 	if exponent > 0 {
 		// Multiply for positive exponent
 		return value.Mul(scaleFactor)
+	} else {
+		// Divide for negative exponent (integer division)
+		return value.Quo(scaleFactor)
 	}
-	// Divide for negative exponent (integer division)
-	return value.Quo(scaleFactor)
 }
 
 // Helper function to get absolute value of an integer

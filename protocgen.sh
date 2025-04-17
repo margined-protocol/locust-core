@@ -19,7 +19,8 @@ cd ./proto
 
 # generate_protos "./stride"
 # generate_protos "./dydxprotocol"
-generate_protos "./neutron"
+# generate_protos "./neutron"
+generate_protos "./umee"
 
 cd ..
 
@@ -28,6 +29,7 @@ cd ..
 # Note: Proto files are suffixed with the current binary version.
 mkdir -p ./pkg/proto
 # cp -r github.com/Stride-Labs/stride/v26/x/* ./pkg/proto/
-cp -r github.com/neutron-org/neutron/v5/x/* ./pkg/proto/
+# cp -r github.com/neutron-org/neutron/v5/x/* ./pkg/proto/
+cp -r github.com/umee-network/umee/v6/x/* ./pkg/proto/
 # cp -r github.com/dydxprotocol/v4-chain/protocol/x/* ./pkg/proto/
 rm -rf github.com

@@ -169,6 +169,11 @@ type MarsConfig struct {
 	Market        string `json:"market" mapstructure:"market"`
 }
 
+type UmeeConfig struct {
+	Denom    string `json:"denom" mapstructure:"denom"` // Denom of the market on Umee
+	Decimals uint64 `json:"decimals" mapstructure:"decimals"`
+}
+
 type DydxConfig struct {
 	Market               string `json:"market" mapstructure:"market"`
 	IndexerURL           string `json:"indexer_url" mapstructure:"indexer_url"`
