@@ -4,17 +4,15 @@ import (
 	"context"
 	"fmt"
 	"runtime"
-	"sync"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/utils"
+	"go.uber.org/zap"
+
+	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"go.uber.org/zap"
 )
 
 // DefaultTransferProvider implements the TransferProvider interface
@@ -27,20 +25,19 @@ type DefaultTransferProvider struct {
 
 	// Dependencies
 	clientRegistry *connection.ClientRegistry
-	ibcRegistry    *IBCConnectionRegistry
+	ibcRegistry    *ConnectionRegistry
 	msgHandler     MessageHandler
 	listeners      map[string]context.CancelFunc // Websocket listeners
-	mu             sync.Mutex                    // Protect maps from concurrent access
 }
 
-type transferData struct {
-	request       TransferRequest
-	result        TransferResult
-	sourceClient  *cosmosclient.Client
-	destClient    *cosmosclient.Client
-	sourceBalance sdk.Coin
-	destBalance   sdk.Coin
-}
+// type transferData struct {
+// 	request       TransferRequest
+// 	result        TransferResult
+// 	sourceClient  *cosmosclient.Client
+// 	destClient    *cosmosclient.Client
+// 	sourceBalance sdk.Coin
+// 	destBalance   sdk.Coin
+// }
 
 // NewTransferProvider creates a new IBC transfer provider
 func NewTransferProvider(
@@ -55,7 +52,7 @@ func NewTransferProvider(
 		clientRegistry: clientRegistry,
 		baseChainID:    baseChainID,
 		signerAccount:  signerAccount,
-		ibcRegistry:    DefaultIBCConnectionRegistry(),
+		ibcRegistry:    DefaultConnectionRegistry(),
 		listeners:      make(map[string]context.CancelFunc),
 		msgHandler:     msgHandler,
 	}
@@ -139,7 +136,12 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 	if err != nil {
 		return fmt.Errorf("failed to create websocket client: %w", err)
 	}
-	defer wsClient.Stop()
+	defer func() {
+		if err := wsClient.Stop(); err != nil {
+			// Handle the error, e.g., log it
+			p.logger.Info("Error stopping wsClient:", zap.Error(err))
+		}
+	}()
 
 	// Subscribe to receive_packet events
 	query := fmt.Sprintf("transfer.recipient = '%s'", request.Receiver)
@@ -210,7 +212,6 @@ func (p *DefaultTransferProvider) CreateTransferMsg(ctx context.Context, request
 	transferMsg, err := CreateTransferWithMemo(
 		conn.Transfer,
 		request.SourceChain,
-		request.DestinationChain,
 		request.Amount,
 		timeout,
 		request.Sender,
@@ -246,9 +247,8 @@ func (p *DefaultTransferProvider) ProcessTransferMsg(ctx context.Context, reques
 
 	// If requested, wait for the receive packet event
 	// Create a context with timeout if specified
-	waitCtx := ctx
 	var cancel context.CancelFunc
-	waitCtx, cancel = context.WithTimeout(ctx, 6*time.Minute)
+	waitCtx, cancel := context.WithTimeout(ctx, 6*time.Minute)
 	defer cancel()
 
 	err = p.waitForReceivePacket(waitCtx, request)

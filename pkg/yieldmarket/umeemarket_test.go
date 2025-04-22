@@ -3,10 +3,10 @@ package yieldmarket
 import (
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
+	ltypes "github.com/margined-protocol/locust-core/pkg/proto/umee/leverage/types"
 	"github.com/stretchr/testify/assert"
 
-	ltypes "github.com/margined-protocol/locust-core/pkg/proto/umee/leverage/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // TestDeriveBorrowAPY tests the borrow rate calculation function

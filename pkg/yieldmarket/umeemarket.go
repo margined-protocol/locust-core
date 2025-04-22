@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	conn "github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
 	"github.com/margined-protocol/locust-core/pkg/math"
+	// Import Umee leverage module types - you'll need to add these to your go.mod
+	ltypes "github.com/margined-protocol/locust-core/pkg/proto/umee/leverage/types"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	// Import Umee leverage module types - you'll need to add these to your go.mod
-	ltypes "github.com/margined-protocol/locust-core/pkg/proto/umee/leverage/types"
+	sdkmath "cosmossdk.io/math"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // UmeeYieldMarket implements the YieldMarket interface for Umee protocol
@@ -89,7 +90,7 @@ func (u *UmeeYieldMarket) GetDenom() string {
 
 // refreshMarketData ensures we have up-to-date market data
 func (u *UmeeYieldMarket) refreshMarketData(ctx context.Context) error {
-	return retry(5, 1*time.Second, *u.logger, func() error {
+	return retry(DefaultRetryAmount, 1*time.Second, *u.logger, func() error {
 		// If data is less than 60 seconds old, don't refresh
 		if u.cachedMarket != nil && time.Since(u.lastUpdated) < 60*time.Second {
 			return nil
@@ -173,7 +174,7 @@ func (u *UmeeYieldMarket) GetTotalDebt(ctx context.Context) (sdkmath.Int, error)
 // GetLentPosition returns the total amount lent including interest
 func (u *UmeeYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, error) {
 	lentAmount := sdkmath.ZeroInt()
-	err := retry(5, 1*time.Second, *u.logger, func() error {
+	err := retry(DefaultRetryAmount, 1*time.Second, *u.logger, func() error {
 		// Create Umee leverage query client
 		queryClient := ltypes.NewQueryClient(u.Connection)
 
@@ -201,7 +202,6 @@ func (u *UmeeYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, err
 		// No position found for this denom
 		return nil
 	})
-
 	if err != nil {
 		return sdkmath.ZeroInt(), err
 	}
@@ -351,7 +351,7 @@ func (u *UmeeYieldMarket) MaximumWithdrawal(ctx context.Context) (sdkmath.Int, e
 }
 
 // LendFunds deposits funds into Umee leverage module
-func (u *UmeeYieldMarket) LendFunds(ctx context.Context, amount sdkmath.Int) sdk.Msg {
+func (u *UmeeYieldMarket) LendFunds(_ context.Context, amount sdkmath.Int) sdk.Msg {
 	// Create MsgSupply message
 	supplyMsg := ltypes.MsgSupply{
 		Supplier: u.senderAddress,

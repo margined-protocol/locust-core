@@ -68,7 +68,6 @@ func Interpolate(
 			x2.Sub(x1),
 		),
 	)
-
 }
 
 // RoundToNearestTickSpacing rounds a value to the nearest multiple of r.
@@ -223,7 +222,7 @@ func DivideWithDecimals(f float64, b *big.Int, decimals int) *big.Int {
 
 // MultiplyWithDecimals multiplies a float64 and a big.Int considering the decimals
 // and returns the result as a fixed-point big.Int with the specified decimals.
-func MultiplyWithDecimals(f float64, b *big.Int, decimals int) *big.Int {
+func MultiplyWithDecimals(f float64, b *big.Int) *big.Int {
 	// Convert float64 to big.Float
 	bigF := new(big.Float).SetFloat64(f)
 
@@ -275,10 +274,10 @@ func ConvertDecimalsSDK(value sdkmath.Int, fromDecimals, toDecimals int) sdkmath
 	if exponent > 0 {
 		// Multiply for positive exponent
 		return value.Mul(scaleFactor)
-	} else {
-		// Divide for negative exponent (integer division)
-		return value.Quo(scaleFactor)
 	}
+
+	// Divide for negative exponent (integer division)
+	return value.Quo(scaleFactor)
 }
 
 // Helper function to get absolute value of an integer

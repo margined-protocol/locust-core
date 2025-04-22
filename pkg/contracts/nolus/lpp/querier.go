@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"math/big"
 
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 )
 
 // CoinDTO represents a coin with denom and amount
@@ -20,8 +19,8 @@ type CoinDTO struct {
 
 // Query client interface definitions
 type QueryClient interface {
-	// LppBalance returns the total balance of the LPP
-	LppBalance(ctx context.Context, req *LppBalanceRequest) (*LppBalanceResponse, error)
+	// PoolBalance returns the total balance of the LPP
+	PoolBalance(ctx context.Context, req *PoolBalanceRequest) (*PoolBalanceResponse, error)
 	// Price returns the current nLPN/LPN exchange rate
 	Price(ctx context.Context, req *PriceRequest) (*PriceResponse, error)
 	// Balance returns a user's nLPN balance
@@ -48,23 +47,23 @@ func NewQueryClient(conn *grpc.ClientConn, contract string) QueryClient {
 	}
 }
 
-// LppBalanceRequest is the request for LppBalance query
-type LppBalanceRequest struct{}
+// PoolBalanceRequest is the request for PoolBalance query
+type PoolBalanceRequest struct{}
 
-// LppBalanceResponse is the response from LppBalance query
-type LppBalanceResponse struct {
+// PoolBalanceResponse is the response from PoolBalance query
+type PoolBalanceResponse struct {
 	Balance           CoinDTO `json:"balance"`
 	TotalPrincipalDue CoinDTO `json:"total_principal_due"`
 	TotalInterestDue  CoinDTO `json:"total_interest_due"`
 	BalanceNlpn       CoinDTO `json:"balance_nlpn"`
 }
 
-// LppBalance queries the total balance in the LPP
-func (q *QueryClientImpl) LppBalance(ctx context.Context, req *LppBalanceRequest) (*LppBalanceResponse, error) {
+// PoolBalance queries the total balance in the LPP
+func (q *QueryClientImpl) PoolBalance(ctx context.Context, _ *PoolBalanceRequest) (*PoolBalanceResponse, error) {
 	queryMsg := struct {
-		LppBalance struct{} `json:"lpp_balance"`
+		PoolBalance struct{} `json:"lpp_balance"`
 	}{
-		LppBalance: struct{}{},
+		PoolBalance: struct{}{},
 	}
 
 	res, err := q.queryContract(ctx, queryMsg)
@@ -72,7 +71,7 @@ func (q *QueryClientImpl) LppBalance(ctx context.Context, req *LppBalanceRequest
 		return nil, err
 	}
 
-	var response LppBalanceResponse
+	var response PoolBalanceResponse
 	if err := json.Unmarshal(res, &response); err != nil {
 		return nil, status.Error(codes.Internal, "failed to unmarshal response")
 	}
@@ -90,7 +89,7 @@ type PriceResponse struct {
 }
 
 // Price queries the current price of nLPN in terms of LPN
-func (q *QueryClientImpl) Price(ctx context.Context, req *PriceRequest) (*PriceResponse, error) {
+func (q *QueryClientImpl) Price(ctx context.Context, _ *PriceRequest) (*PriceResponse, error) {
 	queryMsg := struct {
 		Price struct{} `json:"price"`
 	}{
@@ -173,7 +172,7 @@ type DepositCapacityResponse struct {
 }
 
 // DepositCapacity queries the maximum deposit possible
-func (q *QueryClientImpl) DepositCapacity(ctx context.Context, req *DepositCapacityRequest) (*DepositCapacityResponse, error) {
+func (q *QueryClientImpl) DepositCapacity(ctx context.Context, _ *DepositCapacityRequest) (*DepositCapacityResponse, error) {
 	queryMsg := struct {
 		DepositCapacity struct{} `json:"deposit_capacity"`
 	}{

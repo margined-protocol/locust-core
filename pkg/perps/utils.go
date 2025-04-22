@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
 	"go.uber.org/zap"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 // can be used for any provider

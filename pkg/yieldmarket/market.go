@@ -5,10 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
 	"go.uber.org/zap"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
+const (
+	DefaultRetryAmount = 5
 )
 
 // YieldMarket defines an interface for any market that can provide yield

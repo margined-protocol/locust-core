@@ -3,9 +3,10 @@ package redbank
 import (
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 func TestInterestRateModelValidation(t *testing.T) {

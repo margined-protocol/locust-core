@@ -9,10 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
-	abcitypes "github.com/cometbft/cometbft/abci/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/margined-protocol/locust-core/pkg/connection"
@@ -22,8 +18,14 @@ import (
 	clob "github.com/margined-protocol/locust-core/pkg/proto/dydx/clob/types"
 	send "github.com/margined-protocol/locust-core/pkg/proto/dydx/sending/types"
 	subaccounts "github.com/margined-protocol/locust-core/pkg/proto/dydx/subaccounts/types"
-
 	"go.uber.org/zap"
+
+	sdkmath "cosmossdk.io/math"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 )
 
 const (
@@ -38,9 +40,9 @@ const (
 type DydxProvider struct {
 	logger                    *zap.Logger
 	BaseChainID               string
-	assetId                   uint32 // USDC == 0
-	marketId                  uint32
-	subaccountId              uint32
+	assetID                   uint32 // USDC == 0
+	marketID                  uint32
+	subaccountID              uint32
 	market                    string
 	denom                     string
 	atomicResolution          int64  // Decimal places for the amount, -6 == 6dp
@@ -97,7 +99,7 @@ func NewDydxProvider(
 	logger *zap.Logger,
 
 	// Market configuration
-	marketId uint32,
+	marketID uint32,
 	market string,
 	subticksPerTick uint64,
 	stepBaseQuantums uint64,
@@ -109,7 +111,7 @@ func NewDydxProvider(
 	// Account configuration
 	signerAccount string,
 	executor string,
-	subaccountId uint32,
+	subaccountID uint32,
 	denom string,
 
 	// Chain configuration
@@ -140,7 +142,7 @@ func NewDydxProvider(
 		logger: logger,
 
 		// Market configuration
-		marketId:                  marketId,
+		marketID:                  marketID,
 		market:                    market,
 		subticksPerTick:           subticksPerTick,
 		stepBaseQuantums:          stepBaseQuantums,
@@ -153,7 +155,7 @@ func NewDydxProvider(
 		// Account configuration
 		signerAccount: signerAccount,
 		executor:      executor,
-		subaccountId:  subaccountId,
+		subaccountID:  subaccountID,
 		denom:         denom,
 
 		// Chain configuration
@@ -170,7 +172,7 @@ func NewDydxProvider(
 }
 
 // Initialize implements Provider
-func (m *DydxProvider) Initialize(ctx context.Context) error {
+func (m *DydxProvider) Initialize(_ context.Context) error {
 	// Dydx clients should already be initialized at construction
 	return nil
 }
@@ -184,7 +186,7 @@ func (m *DydxProvider) GetPosition(ctx context.Context) (*Position, error) {
 	}
 
 	// Query subaccount information from indexer first
-	result, err := m.QuerySubaccountIndexer(ctx, account, m.subaccountId)
+	result, err := m.QuerySubaccountIndexer(ctx, account, m.subaccountID)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching indexer data: %w", err)
 	}
@@ -199,7 +201,7 @@ func (m *DydxProvider) GetPosition(ctx context.Context) (*Position, error) {
 		return nil, fmt.Errorf("error processing indexer data: %w", err)
 	}
 
-	currentPrice, err := ProcessCandlesResponse(m.market, candles)
+	currentPrice, err := ProcessCandlesResponse(candles)
 	if err != nil {
 		return nil, fmt.Errorf("error processing candle prices: %w", err)
 	}
@@ -207,18 +209,17 @@ func (m *DydxProvider) GetPosition(ctx context.Context) (*Position, error) {
 	position.CurrentPrice = *currentPrice
 
 	return position, nil
-
 }
 
 // CheckSubaccount implements Provider
-func (m *DydxProvider) CheckSubaccount(account string) (bool, error) {
+func (m *DydxProvider) CheckSubaccount(_ string) (bool, error) {
 	// No need to check subaccount they exist by default
 	return true, nil
 }
 
 // GetSubaccount implements Provider
 func (m *DydxProvider) GetSubaccount() string {
-	return fmt.Sprintf("%d", m.subaccountId)
+	return fmt.Sprintf("%d", m.subaccountID)
 }
 
 // GetProviderDenom implements Provider
@@ -278,7 +279,7 @@ func (m *DydxProvider) GetSubaccountBalance() (sdk.Coins, error) {
 	}
 
 	// Query subaccount information from indexer first
-	result, err := m.QuerySubaccountIndexer(context.Background(), account, m.subaccountId)
+	result, err := m.QuerySubaccountIndexer(context.Background(), account, m.subaccountID)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching indexer data: %w", err)
 	}
@@ -301,8 +302,7 @@ func (m *DydxProvider) GetSubaccountBalance() (sdk.Coins, error) {
 }
 
 // CreateMarketOrder implements Provider
-func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, margin, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
-
+func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, _, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
 	_, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
 	if err != nil {
 		return nil, err
@@ -355,7 +355,7 @@ func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, margin, siz
 				SubaccountId: subaccounts.SubaccountId{
 					Owner: account,
 				},
-				ClobPairId: m.marketId,
+				ClobPairId: m.marketID,
 				OrderFlags: 0, // 0 short-term, 32 conditional, 64 long-term
 			},
 			Side:       clob.Order_Side(side),
@@ -379,7 +379,7 @@ func (m *DydxProvider) CreateMarketOrder(ctx context.Context, price, margin, siz
 }
 
 // CreateLimitOrder implements Provider
-func (m *DydxProvider) CreateLimitOrder(ctx context.Context, price, margin, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
+func (m *DydxProvider) CreateLimitOrder(_ context.Context, price, _, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
 	_, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
 	if err != nil {
 		return nil, err
@@ -429,7 +429,7 @@ func (m *DydxProvider) CreateLimitOrder(ctx context.Context, price, margin, size
 				SubaccountId: subaccounts.SubaccountId{
 					Owner: account,
 				},
-				ClobPairId: m.marketId,
+				ClobPairId: m.marketID,
 				OrderFlags: 64, // 0 short-term, 32 conditional, 64 long-term
 			},
 			Side:       clob.Order_Side(side),
@@ -452,7 +452,7 @@ func (m *DydxProvider) CreateLimitOrder(ctx context.Context, price, margin, size
 }
 
 // DepositSubaccount implements Provider
-func (m *DydxProvider) DepositSubaccount(ctx context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
+func (m *DydxProvider) DepositSubaccount(_ context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
 	// Validate non-zero amount
 	if amount.IsZero() {
 		m.logger.Info("Skipping deposit for zero amount")
@@ -468,16 +468,16 @@ func (m *DydxProvider) DepositSubaccount(ctx context.Context, amount sdkmath.Int
 		Sender: account,
 		Recipient: subaccounts.SubaccountId{
 			Owner:  account,
-			Number: m.subaccountId,
+			Number: m.subaccountID,
 		},
-		AssetId:  m.assetId,
+		AssetId:  m.assetID,
 		Quantums: amount.Uint64(),
 	}
 	return []sdk.Msg{&deposit}, nil
 }
 
 // WithdrawSubaccount implements Provider
-func (m *DydxProvider) WithdrawSubaccount(ctx context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
+func (m *DydxProvider) WithdrawSubaccount(_ context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
 	// Validate non-zero amount early
 	if amount.IsZero() {
 		m.logger.Info("Skipping withdrawal for zero amount")
@@ -537,10 +537,10 @@ func (m *DydxProvider) WithdrawSubaccount(ctx context.Context, amount sdkmath.In
 	withdraw := &send.MsgWithdrawFromSubaccount{
 		Sender: subaccounts.SubaccountId{
 			Owner:  account,
-			Number: m.subaccountId,
+			Number: m.subaccountID,
 		},
 		Recipient: account,
-		AssetId:   m.assetId,
+		AssetId:   m.assetID,
 		Quantums:  amount.Uint64(),
 	}
 
@@ -582,7 +582,7 @@ func (m *DydxProvider) GetLiquidationPrice(equity, size, entryPrice, maintenance
 // ProcessPerpEvent implements Provider
 func (m *DydxProvider) ProcessPerpEvent(_ []abcitypes.Event) (currentPrice string, entryPrice string, err error) {
 	// Get fills from indexer
-	fills, err := m.QueryFillsIndexer(context.Background(), m.executor, m.subaccountId)
+	fills, err := m.QueryFillsIndexer(context.Background(), m.executor, m.subaccountID)
 	if err != nil {
 		return "", "", fmt.Errorf("error fetching fills: %w", err)
 	}
@@ -629,7 +629,7 @@ func (m *DydxProvider) ProcessPerpEvent(_ []abcitypes.Event) (currentPrice strin
 }
 
 // CreateSubaccount implements Provider
-func (m *DydxProvider) CreateSubaccount(account string) (sdk.Msg, error) {
+func (m *DydxProvider) CreateSubaccount(_ string) (sdk.Msg, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -793,14 +793,13 @@ func (m *DydxProvider) ReducePosition(ctx context.Context, price float64, amount
 	}
 
 	return result, nil
-
 }
 
-func (m *DydxProvider) ClosePosition(ctx context.Context, isLong bool) (*ExecutionResult, error) {
+func (m *DydxProvider) ClosePosition(_ context.Context, _ bool) (*ExecutionResult, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (m *DydxProvider) AdjustMargin(ctx context.Context, margin sdkmath.Int, isAdd bool) (*ExecutionResult, error) {
+func (m *DydxProvider) AdjustMargin(_ context.Context, _ sdkmath.Int, _ bool) (*ExecutionResult, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 

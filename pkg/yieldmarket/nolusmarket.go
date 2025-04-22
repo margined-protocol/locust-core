@@ -5,13 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	conn "github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/contracts/nolus/lpp"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+
+	sdkmath "cosmossdk.io/math"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // NolusYieldMarket implements the YieldMarket interface for Nolus protocol
@@ -26,9 +28,9 @@ type NolusYieldMarket struct {
 	Connection *grpc.ClientConn
 
 	// For tracking state between calls
-	cachedLppBalance *lpp.LppBalanceResponse
-	cachedPrice      *lpp.PriceResponse
-	lastUpdated      time.Time
+	cachedPoolBalance *lpp.PoolBalanceResponse
+	cachedPrice       *lpp.PriceResponse
+	lastUpdated       time.Time
 
 	// IBC Registry
 	transferProvider ibc.TransferProvider
@@ -66,6 +68,7 @@ func NewNolusYieldMarket(
 		clientRegistry:   clientRegistry,
 		signerAccount:    signerAccount,
 		senderAddress:    senderAddress,
+		logger:           logger,
 	}
 }
 
@@ -86,19 +89,19 @@ func (n *NolusYieldMarket) GetDenom() string {
 
 // refreshMarketData ensures we have up-to-date market data
 func (n *NolusYieldMarket) refreshMarketData(ctx context.Context) error {
-	return retry(5, 1*time.Second, *n.logger, func() error {
+	return retry(DefaultRetryAmount, 1*time.Second, *n.logger, func() error {
 		// If data is less than 60 seconds old, don't refresh
-		if n.cachedLppBalance != nil && time.Since(n.lastUpdated) < 60*time.Second {
+		if n.cachedPoolBalance != nil && time.Since(n.lastUpdated) < 60*time.Second {
 			return nil
 		}
 
 		// Fetch updated LPP balance
 		lppClient := lpp.NewQueryClient(n.Connection, n.LppContract)
 
-		// Get LppBalance
-		balance, err := lppClient.LppBalance(
+		// Get PoolBalance
+		balance, err := lppClient.PoolBalance(
 			ctx,
-			&lpp.LppBalanceRequest{},
+			&lpp.PoolBalanceRequest{},
 		)
 		if err != nil {
 			return fmt.Errorf("failed to fetch LPP balance: %w", err)
@@ -113,7 +116,7 @@ func (n *NolusYieldMarket) refreshMarketData(ctx context.Context) error {
 			return fmt.Errorf("failed to fetch price: %w", err)
 		}
 
-		n.cachedLppBalance = balance
+		n.cachedPoolBalance = balance
 		n.cachedPrice = price
 		n.lastUpdated = time.Now()
 		return nil
@@ -169,7 +172,7 @@ func (n *NolusYieldMarket) GetTotalLiquidity(ctx context.Context) (sdkmath.Int, 
 
 	// Extract total liquidity from cached balance
 	// Assuming the balance has a field for total LPP balance
-	liquidity, success := sdkmath.NewIntFromString(n.cachedLppBalance.Balance.Amount)
+	liquidity, success := sdkmath.NewIntFromString(n.cachedPoolBalance.Balance.Amount)
 	if !success {
 		return sdkmath.Int{}, fmt.Errorf("invalid balance amount")
 	}
@@ -184,12 +187,12 @@ func (n *NolusYieldMarket) GetTotalDebt(ctx context.Context) (sdkmath.Int, error
 	}
 
 	// Extract total debt (principal + interest due)
-	principalDue, success := sdkmath.NewIntFromString(n.cachedLppBalance.TotalPrincipalDue.Amount)
+	principalDue, success := sdkmath.NewIntFromString(n.cachedPoolBalance.TotalPrincipalDue.Amount)
 	if !success {
 		return sdkmath.Int{}, fmt.Errorf("invalid principal due")
 	}
 
-	interestDue, success := sdkmath.NewIntFromString(n.cachedLppBalance.TotalInterestDue.Amount)
+	interestDue, success := sdkmath.NewIntFromString(n.cachedPoolBalance.TotalInterestDue.Amount)
 	if !success {
 		return sdkmath.Int{}, fmt.Errorf("invalid interest due")
 	}
@@ -200,7 +203,7 @@ func (n *NolusYieldMarket) GetTotalDebt(ctx context.Context) (sdkmath.Int, error
 // GetLentPosition returns the total amount lent including interest
 func (n *NolusYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, error) {
 	lentAmount := sdkmath.ZeroInt()
-	err := retry(5, 1*time.Second, *n.logger, func() error {
+	err := retry(DefaultRetryAmount, 1*time.Second, *n.logger, func() error {
 		// Query the LPP contract for the user's balance
 		lppClient := lpp.NewQueryClient(n.Connection, n.LppContract)
 
@@ -217,7 +220,6 @@ func (n *NolusYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, er
 		lentAmount = sdkmath.NewIntFromUint64(balanceResp.Balance.Uint64())
 		return nil
 	})
-
 	if err != nil {
 		return sdkmath.ZeroInt(), err
 	}
@@ -226,7 +228,7 @@ func (n *NolusYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, er
 }
 
 // CalculateRateWithUtilization simulates the rate after changing utilization
-func (n *NolusYieldMarket) CalculateRateWithUtilization(ctx context.Context, utilizationRate sdkmath.LegacyDec) (sdkmath.LegacyDec, error) {
+func (n *NolusYieldMarket) CalculateRateWithUtilization(_ context.Context, _ sdkmath.LegacyDec) (sdkmath.LegacyDec, error) {
 	// Nolus might not have a direct API for this, we would need to implement
 	// based on the interest rate model from Nolus
 	return sdkmath.LegacyNewDec(0), fmt.Errorf("not implemented: Nolus interest rate simulation")
@@ -292,26 +294,26 @@ func (n *NolusYieldMarket) MaximumWithdrawal(ctx context.Context) (sdkmath.Int, 
 	}
 
 	// Get deposit capacity to check if withdrawal is constrained by utilization
-	capacityResp, err := lppClient.DepositCapacity(
-		ctx,
-		&lpp.DepositCapacityRequest{},
-	)
-	if err != nil {
-		return sdkmath.Int{}, fmt.Errorf("failed to fetch deposit capacity: %w", err)
-	}
+	// capacityResp, err := lppClient.DepositCapacity(
+	// 	ctx,
+	// 	&lpp.DepositCapacityRequest{},
+	// )
+	// if err != nil {
+	// 	return sdkmath.Int{}, fmt.Errorf("failed to fetch deposit capacity: %w", err)
+	// }
 
 	// If deposit capacity exists, it means the pool has utilization constraints
-	if capacityResp.Capacity != nil {
-		// Implementation would need to calculate maximum withdrawal considering utilization
-		// This is a placeholder
-	}
+	// if capacityResp.Capacity != nil {
+	// 	// Implementation would need to calculate maximum withdrawal considering utilization
+	// 	// This is a placeholder
+	// }
 
 	// Return the balance as maximum withdrawal
 	return sdkmath.NewIntFromUint64(balanceResp.Balance.Uint64()), nil
 }
 
 // LendFunds deposits funds into the LPP
-func (n *NolusYieldMarket) LendFunds(ctx context.Context, amount sdkmath.Int) sdk.Msg {
+func (n *NolusYieldMarket) LendFunds(_ context.Context, amount sdkmath.Int) sdk.Msg {
 	// Create deposit message for the LPP contract
 	depositMsg, err := lpp.BuildDepositMsg(n.senderAddress, n.LppContract, sdk.NewCoins(sdk.NewCoin(n.Denom, amount)))
 	if err != nil {
@@ -328,7 +330,7 @@ func (n *NolusYieldMarket) calculateBurnAmount(amount sdkmath.Int, price sdkmath
 	invPrice := sdkmath.LegacyOneDec().Quo(price)
 
 	// Scale the inverse price by 10^decimals to preserve precision when converting to Int
-	scaleFactor := sdkmath.LegacyNewDec(10).Power(uint64(n.Decimals))
+	scaleFactor := sdkmath.LegacyNewDec(10).Power(n.Decimals)
 	scaledInvPrice := invPrice.Mul(scaleFactor)
 
 	// Convert to Int preserving decimals, then multiply by amount

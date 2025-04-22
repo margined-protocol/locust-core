@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 func TestComputeUnderlyingAmount(t *testing.T) {

@@ -11,7 +11,7 @@ import (
 func TestCreateForwardMemo(t *testing.T) {
 	tests := []struct {
 		name             string
-		conn             *IBCTransfer
+		conn             *Transfer
 		receiver         string
 		destChainID      string
 		expectedMemo     string
@@ -21,7 +21,7 @@ func TestCreateForwardMemo(t *testing.T) {
 	}{
 		{
 			name: "Direct transfer without forwarding",
-			conn: &IBCTransfer{
+			conn: &Transfer{
 				SourceChainID: "osmosis-1",
 				DestChainID:   "umee-1",
 				Channel:       "channel-42",
@@ -36,7 +36,7 @@ func TestCreateForwardMemo(t *testing.T) {
 		},
 		{
 			name: "Transfer with forwarding",
-			conn: &IBCTransfer{
+			conn: &Transfer{
 				SourceChainID: "osmosis-1",
 				DestChainID:   "umee-1",
 				Channel:       "channel-120",
@@ -56,7 +56,7 @@ func TestCreateForwardMemo(t *testing.T) {
 		},
 		{
 			name: "Forward with empty receiver",
-			conn: &IBCTransfer{
+			conn: &Transfer{
 				SourceChainID: "osmosis-1",
 				DestChainID:   "umee-1",
 				Channel:       "channel-120",
@@ -87,7 +87,7 @@ func TestCreateForwardMemo(t *testing.T) {
 		},
 		{
 			name: "Real-world example from logs",
-			conn: &IBCTransfer{
+			conn: &Transfer{
 				SourceChainID: "osmosis-1",
 				DestChainID:   "umee-1",
 				Channel:       "channel-120",
@@ -109,7 +109,7 @@ func TestCreateForwardMemo(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			memo, receiver, err := CreateForwardMemo(tc.conn, tc.receiver, tc.destChainID)
+			memo, receiver, err := CreateForwardMemo(tc.conn, tc.receiver)
 
 			if tc.shouldError {
 				require.Error(t, err)

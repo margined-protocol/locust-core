@@ -4,23 +4,23 @@ import (
 	"fmt"
 )
 
-// IBCConnectionRegistry manages IBC connections between chains
-type IBCConnectionRegistry struct {
+// ConnectionRegistry manages IBC connections between chains
+type ConnectionRegistry struct {
 	// Map of source chain ID -> destination chain ID -> connection
-	connections map[string]map[string]*IBCConnection
+	connections map[string]map[string]*Connection
 }
 
-// NewIBCConnectionRegistry creates a new registry
-func NewIBCConnectionRegistry() *IBCConnectionRegistry {
-	return &IBCConnectionRegistry{
-		connections: make(map[string]map[string]*IBCConnection),
+// NewConnectionRegistry creates a new registry
+func NewConnectionRegistry() *ConnectionRegistry {
+	return &ConnectionRegistry{
+		connections: make(map[string]map[string]*Connection),
 	}
 }
 
-// DefaultIBCConnectionRegistry creates a new registry
-func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
-	dydxToOsmosis := &IBCConnection{
-		Transfer: &IBCTransfer{
+// DefaultConnectionRegistry creates a new registry
+func DefaultConnectionRegistry() *ConnectionRegistry {
+	dydxToOsmosis := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "dydx-mainnet-1",
 			DestChainID:   "osmosis-1",
 			Channel:       "channel-0",
@@ -36,8 +36,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	dydxToNeutron := &IBCConnection{
-		Transfer: &IBCTransfer{
+	dydxToNeutron := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "dydx-mainnet-1",
 			DestChainID:   "neutron-1",
 			Channel:       "channel-0",
@@ -53,8 +53,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	neutronToOsmosis := &IBCConnection{
-		Transfer: &IBCTransfer{
+	neutronToOsmosis := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "neutron-1",
 			DestChainID:   "osmosis-1",
 			Channel:       "channel-30",
@@ -70,8 +70,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	neutronToDydx := &IBCConnection{
-		Transfer: &IBCTransfer{
+	neutronToDydx := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "neutron-1",
 			DestChainID:   "dydx-mainnet-1",
 			Channel:       "channel-30",
@@ -87,8 +87,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	neutronToUmee := &IBCConnection{
-		Transfer: &IBCTransfer{
+	neutronToUmee := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "neutron-1",
 			DestChainID:   "umee-1",
 			Channel:       "channel-30",
@@ -104,8 +104,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	osmosisToDydx := &IBCConnection{
-		Transfer: &IBCTransfer{
+	osmosisToDydx := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "osmosis-1",
 			DestChainID:   "dydx-mainnet-1",
 			Channel:       "channel-750",
@@ -121,8 +121,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	osmosisToNeutron := &IBCConnection{
-		Transfer: &IBCTransfer{
+	osmosisToNeutron := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "osmosis-1",   // Mainnet chain ID
 			DestChainID:   "neutron-1",   // Mainnet chain ID
 			Channel:       "channel-750", // Noble
@@ -138,8 +138,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	osmosisToUmee := &IBCConnection{
-		Transfer: &IBCTransfer{
+	osmosisToUmee := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "osmosis-1",   // Mainnet chain ID
 			DestChainID:   "umee-1",      // Mainnet chain ID
 			Channel:       "channel-750", // Noble
@@ -155,8 +155,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	umeeToOsmosis := &IBCConnection{
-		Transfer: &IBCTransfer{
+	umeeToOsmosis := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "umee-1",
 			DestChainID:   "osmosis-1",
 			Channel:       "channel-120",
@@ -172,8 +172,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	umeeToNeutron := &IBCConnection{
-		Transfer: &IBCTransfer{
+	umeeToNeutron := &Connection{
+		Transfer: &Transfer{
 			SourceChainID: "umee-1",
 			DestChainID:   "osmosis-1",
 			Channel:       "channel-51",
@@ -189,8 +189,8 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	return &IBCConnectionRegistry{
-		connections: map[string]map[string]*IBCConnection{
+	return &ConnectionRegistry{
+		connections: map[string]map[string]*Connection{
 			"osmosis-1": {
 				"neutron-1":      osmosisToNeutron,
 				"dydx-mainnet-1": osmosisToDydx,
@@ -214,13 +214,13 @@ func DefaultIBCConnectionRegistry() *IBCConnectionRegistry {
 }
 
 // RegisterConnection adds a new IBC connection to the registry
-func (r *IBCConnectionRegistry) RegisterConnection(connection *IBCConnection) error {
+func (r *ConnectionRegistry) RegisterConnection(connection *Connection) error {
 	sourceChainID := connection.Transfer.SourceChainID
 	destChainID := connection.Transfer.DestChainID
 
 	// Initialize the inner map if it doesn't exist
 	if _, exists := r.connections[sourceChainID]; !exists {
-		r.connections[sourceChainID] = make(map[string]*IBCConnection)
+		r.connections[sourceChainID] = make(map[string]*Connection)
 	}
 
 	// Check if connection already exists
@@ -234,7 +234,7 @@ func (r *IBCConnectionRegistry) RegisterConnection(connection *IBCConnection) er
 }
 
 // RegisterConnections adds multiple IBC connections to the registry
-func (r *IBCConnectionRegistry) RegisterConnections(connections []*IBCConnection) error {
+func (r *ConnectionRegistry) RegisterConnections(connections []*Connection) error {
 	for _, conn := range connections {
 		if err := r.RegisterConnection(conn); err != nil {
 			return fmt.Errorf("failed to register connection from %s to %s: %w",
@@ -247,7 +247,7 @@ func (r *IBCConnectionRegistry) RegisterConnections(connections []*IBCConnection
 }
 
 // GetConnection retrieves an IBC connection from the registry
-func (r *IBCConnectionRegistry) GetConnection(sourceChainID, destChainID string) (*IBCConnection, error) {
+func (r *ConnectionRegistry) GetConnection(sourceChainID, destChainID string) (*Connection, error) {
 	// Check if source chain exists
 	sourceMap, exists := r.connections[sourceChainID]
 	if !exists {
@@ -264,8 +264,8 @@ func (r *IBCConnectionRegistry) GetConnection(sourceChainID, destChainID string)
 }
 
 // GetAllConnections returns all registered connections
-func (r *IBCConnectionRegistry) GetAllConnections() []*IBCConnection {
-	var allConnections []*IBCConnection
+func (r *ConnectionRegistry) GetAllConnections() []*Connection {
+	var allConnections []*Connection
 
 	for _, destMap := range r.connections {
 		for _, connection := range destMap {

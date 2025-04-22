@@ -5,25 +5,27 @@ import (
 	"encoding/json"
 	"fmt"
 
-	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	neutronfeetypes "github.com/margined-protocol/locust-core/pkg/proto/neutron/feerefunder/types"
 	neutrontransfertypes "github.com/margined-protocol/locust-core/pkg/proto/neutron/transfer/types"
 
 	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 )
 
-// IBCConnection manages IBC connections between chains
-type IBCConnection struct {
-	Transfer      *IBCTransfer
+// Connection manages IBC connections between chains
+type Connection struct {
+	Transfer      *Transfer
 	SourcePrefix  string
 	DestPrefix    string
 	ForwardPrefix string
 }
 
 // IBCTransfer represents an IBC connection between two chains
-type IBCTransfer struct {
+type Transfer struct {
 	SourceChainID string   // Chain ID of the source chain (e.g., "osmosis-1")
 	DestChainID   string   // Chain ID of the destination chain (e.g., "neutron-1")
 	Channel       string   // Channel ID on the source chain
@@ -169,14 +171,14 @@ func CreateTransferMsg(port, channel, memo, sender, receiver string, token sdk.C
 
 // CreateTransferWithMemo creates an IBC transfer message with a memo if forwarding
 func CreateTransferWithMemo(
-	conn *IBCTransfer,
-	sourceChainID, destChainID string,
+	conn *Transfer,
+	sourceChainID string,
 	coin sdk.Coin,
 	blockHeight uint64,
 	sender, receiver string,
 ) (sdk.Msg, error) {
 	// Create memo and determine receiver based on connection type
-	memo, receiver, err := CreateForwardMemo(conn, receiver, destChainID)
+	memo, receiver, err := CreateForwardMemo(conn, receiver)
 	if err != nil {
 		return nil, err
 	}
@@ -218,9 +220,8 @@ func CreateTransferWithMemo(
 
 // createForwardMemo creates a properly formatted memo for IBC transfers based on connection type
 func CreateForwardMemo(
-	conn *IBCTransfer,
+	conn *Transfer,
 	receiver string,
-	destChainID string,
 ) (string, string, error) {
 	// Validate inputs
 	if conn == nil {

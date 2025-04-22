@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // TransferProvider defines the interface for IBC transfers between chains

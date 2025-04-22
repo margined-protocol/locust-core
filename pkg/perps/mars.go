@@ -4,15 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	sdkmath "cosmossdk.io/math"
-	abcitypes "github.com/cometbft/cometbft/abci/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/margined-protocol/locust-core/pkg/contracts/mars/creditmanager"
 	marsperps "github.com/margined-protocol/locust-core/pkg/contracts/mars/perps"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
 	"github.com/margined-protocol/locust-core/pkg/types"
 	"go.uber.org/zap"
+
+	sdkmath "cosmossdk.io/math"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 )
 
 const (
@@ -60,7 +62,7 @@ func NewMarsProvider(
 }
 
 // Initialize implements Provider
-func (m *MarsProvider) Initialize(ctx context.Context) error {
+func (m *MarsProvider) Initialize(_ context.Context) error {
 	// Mars clients should already be initialized at construction
 	return nil
 }
@@ -151,7 +153,7 @@ func (m *MarsProvider) GetSubaccountBalance() (sdk.Coins, error) {
 }
 
 // CreateMarketOrder implements Provider
-func (m *MarsProvider) CreateMarketOrder(ctx context.Context, price, margin, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
+func (m *MarsProvider) CreateMarketOrder(_ context.Context, _, margin, size sdkmath.Int, _, reduceOnly bool) ([]sdk.Msg, error) {
 	// NOTE: currently isBuy is not used but that _should_ change negative size is a sell
 	// _, account, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
 	// if err != nil {
@@ -159,7 +161,7 @@ func (m *MarsProvider) CreateMarketOrder(ctx context.Context, price, margin, siz
 	// }
 	// Price is basically unused in mars
 
-	account := "todoasabove"
+	account := "todoasabove-1"
 
 	// Convert the previous increasePerpPosition/decreasePerpPosition logic to handle both cases
 	if reduceOnly {
@@ -171,14 +173,14 @@ func (m *MarsProvider) CreateMarketOrder(ctx context.Context, price, margin, siz
 }
 
 // CreateLimitOrder implements Provider
-func (m *MarsProvider) CreateLimitOrder(ctx context.Context, price, margin, size sdkmath.Int, isBuy, reduceOnly bool) ([]sdk.Msg, error) {
+func (m *MarsProvider) CreateLimitOrder(_ context.Context, _, _, _ sdkmath.Int, _, _ bool) ([]sdk.Msg, error) {
 	// Mars might not support limit orders directly
 	return nil, fmt.Errorf("limit orders not supported by Mars provider")
 }
 
 // DepositSubaccount implements Provider
-func (m *MarsProvider) DepositSubaccount(ctx context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
-	account := "todoasabove"
+func (m *MarsProvider) DepositSubaccount(_ context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
+	account := "todoasabove-2"
 
 	m.logger.Debug("Depositing Subaccount",
 		zap.String("sender", account),
@@ -214,8 +216,8 @@ func (m *MarsProvider) DepositSubaccount(ctx context.Context, amount sdkmath.Int
 }
 
 // WithdrawSubaccount implements Provider
-func (m *MarsProvider) WithdrawSubaccount(ctx context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
-	account := "todoasabove"
+func (m *MarsProvider) WithdrawSubaccount(_ context.Context, amount sdkmath.Int) ([]sdk.Msg, error) {
+	account := "todoasabove-3"
 
 	m.logger.Debug("Withdrawing Subaccount",
 		zap.String("sender", account),
@@ -257,7 +259,7 @@ func (m *MarsProvider) WithdrawSubaccount(ctx context.Context, amount sdkmath.In
 }
 
 // GetLiquidationPrice implements Provider
-func (m *MarsProvider) GetLiquidationPrice(equity, size, entryPrice, maintenanceMargin sdkmath.LegacyDec) sdkmath.LegacyDec {
+func (m *MarsProvider) GetLiquidationPrice(_, _, _, _ sdkmath.LegacyDec) sdkmath.LegacyDec {
 	// Your existing liquidation price calculation
 	return sdkmath.LegacyZeroDec() // Replace with actual calculation
 }
@@ -413,7 +415,7 @@ func GetPosition(creditPositions creditmanager.PositionsResponse, perpPosition *
 	return position, nil
 }
 
-func (m *MarsProvider) IncreasePosition(ctx context.Context, price float64, amount, margin sdkmath.Int, isLong bool) (*ExecutionResult, error) {
+func (m *MarsProvider) IncreasePosition(ctx context.Context, _ float64, amount, _ sdkmath.Int, _ bool) (*ExecutionResult, error) {
 	// Pseudo Logic
 	// 1. Create message containing:
 	// - Deposit to subaccount
@@ -468,14 +470,14 @@ func (m *MarsProvider) IncreasePosition(ctx context.Context, price float64, amou
 	return result, nil
 }
 
-func (m *MarsProvider) ReducePosition(ctx context.Context, price float64, amount, margin sdkmath.Int, isLong bool) (*ExecutionResult, error) {
+func (m *MarsProvider) ReducePosition(_ context.Context, _ float64, _, _ sdkmath.Int, _ bool) (*ExecutionResult, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (m *MarsProvider) ClosePosition(ctx context.Context, isLong bool) (*ExecutionResult, error) {
+func (m *MarsProvider) ClosePosition(_ context.Context, _ bool) (*ExecutionResult, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (m *MarsProvider) AdjustMargin(ctx context.Context, margin sdkmath.Int, isAdd bool) (*ExecutionResult, error) {
+func (m *MarsProvider) AdjustMargin(_ context.Context, _ sdkmath.Int, _ bool) (*ExecutionResult, error) {
 	return nil, fmt.Errorf("not implemented")
 }

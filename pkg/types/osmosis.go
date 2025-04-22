@@ -32,6 +32,7 @@ type CLMMStrategyConfig struct {
 	DefaultToken0Amount SdkInt `toml:"default_token_0_amount" mapstructure:"default_token_0_amount"`
 	DefaultToken1Amount SdkInt `toml:"default_token_1_amount" mapstructure:"default_token_1_amount"`
 	ChainID             string `toml:"chain_id" mapstructure:"chain_id"`
+	Kill                bool   `toml:"kill" mapstructure:"kill"`
 	Granter             string `toml:"granter" mapstructure:"granter"`
 	Pool                Pool   `toml:"pool" mapstructure:"pool"`
 

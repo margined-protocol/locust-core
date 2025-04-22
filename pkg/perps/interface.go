@@ -4,8 +4,10 @@ import (
 	"context"
 
 	sdkmath "cosmossdk.io/math"
-	abcitypes "github.com/cometbft/cometbft/abci/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 )
 
 // Position represents a perpetual futures position

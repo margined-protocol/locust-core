@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"strconv"
 
-	sdkmath "cosmossdk.io/math"
-	abcitypes "github.com/cometbft/cometbft/abci/types"
 	"github.com/margined-protocol/locust-core/pkg/math"
+
+	sdkmath "cosmossdk.io/math"
+
+	abcitypes "github.com/cometbft/cometbft/abci/types"
 )
 
 func ProcessMarsPerpEvent(events []abcitypes.Event) (currentPrice string, entryPrice string, err error) {
@@ -44,7 +46,6 @@ func ProcessMarsPerpEvent(events []abcitypes.Event) (currentPrice string, entryP
 
 // ProcessCandlesResponse converts indexer response data into a Position
 func ProcessCandlesResponse(
-	market string,
 	response *IndexerCandleResponse,
 ) (*sdkmath.LegacyDec, error) {
 	if response == nil {

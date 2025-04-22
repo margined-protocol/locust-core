@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/margined-protocol/locust-core/pkg/contracts/nolus/lpp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 // MockLPPQueryClient is a mock implementation of the lpp.QueryClient interface
@@ -22,9 +23,9 @@ func (m *MockLPPQueryClient) Price(ctx context.Context, req *lpp.PriceRequest) (
 }
 
 // Implement other methods from lpp.QueryClient interface with empty implementations
-func (m *MockLPPQueryClient) LppBalance(ctx context.Context, req *lpp.LppBalanceRequest) (*lpp.LppBalanceResponse, error) {
+func (m *MockLPPQueryClient) PoolBalance(ctx context.Context, req *lpp.PoolBalanceRequest) (*lpp.PoolBalanceResponse, error) {
 	args := m.Called(ctx, req)
-	return args.Get(0).(*lpp.LppBalanceResponse), args.Error(1)
+	return args.Get(0).(*lpp.PoolBalanceResponse), args.Error(1)
 }
 
 func (m *MockLPPQueryClient) Balance(ctx context.Context, req *lpp.BalanceRequest) (*lpp.BalanceResponse, error) {
@@ -96,7 +97,7 @@ func TestGetPrice(t *testing.T) {
 	).Once()
 
 	// Call the function
-	price, err := market.getPrice(context.Background())
+	price, err := market.getPrice(t.Context())
 
 	// Assertions
 	assert.NoError(t, err)
@@ -113,7 +114,7 @@ func TestGetPrice(t *testing.T) {
 		nil,
 	).Once()
 
-	price, err = market.getPrice(context.Background())
+	price, err = market.getPrice(t.Context())
 	assert.NoError(t, err)
 	assert.NotNil(t, price)
 	assert.Equal(t, "2", price.String()) // 200000000/100000000 = 2

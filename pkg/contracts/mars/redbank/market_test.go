@@ -3,15 +3,20 @@ package redbank
 import (
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	sdkmath "cosmossdk.io/math"
+)
+
+const (
+	DefaultReserveFactor = "0.2"
 )
 
 func TestMarketValidation(t *testing.T) {
 	// Valid market
 	market := NewMarket("uatom")
-	market.ReserveFactor = "0.2"
+	market.ReserveFactor = DefaultReserveFactor
 	market.InterestRateModel = InterestRateModel{
 		OptimalUtilizationRate: "0.8",
 		Base:                   "0",
@@ -51,7 +56,7 @@ func TestMarketValidation(t *testing.T) {
 
 func TestUpdateInterestRates(t *testing.T) {
 	market := NewMarket("uatom")
-	market.ReserveFactor = "0.2"
+	market.ReserveFactor = DefaultReserveFactor
 	market.InterestRateModel = InterestRateModel{
 		OptimalUtilizationRate: "0.8",
 		Base:                   "0",
@@ -157,7 +162,7 @@ func TestCollateralAndDebtOperations(t *testing.T) {
 func TestMarketLifecycle(t *testing.T) {
 	// Create a market with interest rate model
 	market := NewMarket("uatom")
-	market.ReserveFactor = "0.2"
+	market.ReserveFactor = DefaultReserveFactor
 	market.InterestRateModel = InterestRateModel{
 		OptimalUtilizationRate: "0.8",
 		Base:                   "0",

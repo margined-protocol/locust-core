@@ -92,7 +92,7 @@ func (m *MarsYieldMarket) GetDenom() string {
 
 // refreshMarketData ensures we have up-to-date market data
 func (m *MarsYieldMarket) refreshMarketData(ctx context.Context) error {
-	return retry(5, 1*time.Second, *m.logger, func() error {
+	return retry(DefaultRetryAmount, 1*time.Second, *m.logger, func() error {
 		// If data is less than 60 seconds old, don't refresh
 		if m.cachedMarket != nil && time.Since(m.lastUpdated) < 60*time.Second {
 			return nil
@@ -163,7 +163,7 @@ func (m *MarsYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, err
 	m.logger.Debug("📊 Getting lent position for market", zap.String("market", m.ChainID))
 
 	lentAmount := sdkmath.ZeroInt()
-	err := retry(5, 1*time.Second, *m.logger, func() error {
+	err := retry(4, 2*time.Second, *m.logger, func() error {
 		// Actual logic to get the lent position
 		// Fetch credit positions
 		if m.Connection == nil {
@@ -195,7 +195,6 @@ func (m *MarsYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, err
 
 		return nil
 	})
-
 	if err != nil {
 		return sdkmath.ZeroInt(), err
 	}
@@ -307,7 +306,7 @@ func (m *MarsYieldMarket) MaximumWithdrawal(ctx context.Context) (sdkmath.Int, e
 }
 
 // LendFunds deposits funds into the credit account and lends them
-func (m *MarsYieldMarket) LendFunds(ctx context.Context, amount sdkmath.Int) sdk.Msg {
+func (m *MarsYieldMarket) LendFunds(_ context.Context, amount sdkmath.Int) sdk.Msg {
 	// Create withdrawal message
 	// Prepare sender and receiver addresses
 	creditAccount := fmt.Sprintf("%d", m.CreditAccount)
@@ -348,7 +347,7 @@ func (m *MarsYieldMarket) LendFunds(ctx context.Context, amount sdkmath.Int) sdk
 }
 
 // WithdrawFunds withdraws funds from the credit account
-func (m *MarsYieldMarket) WithdrawFunds(ctx context.Context, amount sdkmath.Int) sdk.Msg {
+func (m *MarsYieldMarket) WithdrawFunds(_ context.Context, amount sdkmath.Int) sdk.Msg {
 	// Create withdrawal message
 	// Prepare sender and receiver addresses
 

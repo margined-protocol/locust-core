@@ -3,9 +3,10 @@ package perps
 import (
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 func TestValidateAndRoundPrice(t *testing.T) {
@@ -155,7 +156,7 @@ func TestProcessIndexerResponse(t *testing.T) {
 					Size:             "24.566911",
 					Symbol:           "USDC",
 					Side:             "LONG",
-					AssetId:          "0",
+					AssetID:          "0",
 					SubaccountNumber: 0,
 				},
 			},
@@ -197,7 +198,6 @@ func TestProcessCandlesResponse(t *testing.T) {
 
 	// Process response
 	currentPrice, err := ProcessCandlesResponse(
-		"ATOM-USD",
 		response,
 	)
 

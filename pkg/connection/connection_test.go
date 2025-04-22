@@ -1,18 +1,16 @@
 package connection
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
+	"github.com/margined-protocol/locust-core/pkg/types"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-
-	"github.com/margined-protocol/locust-core/pkg/types"
 )
 
 func TestAddressPrefixCaching(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	logger := zap.NewExample()
 
 	// Simple chain configs
@@ -55,7 +53,7 @@ func TestAddressPrefixCaching(t *testing.T) {
 		require.Contains(t, dydxAddr, "dydx")
 
 		address, err := dydxAccount.Record.GetAddress()
-		fmt.Println("dydx address", address.Bytes())
+		fmt.Println("dydx address", string(address.Bytes()))
 		fmt.Println("dydx address", address.String())
 		require.NoError(t, err)
 		require.Contains(t, address.String(), "dydx")

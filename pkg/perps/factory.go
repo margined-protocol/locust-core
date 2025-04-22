@@ -1,10 +1,8 @@
 package perps
 
 import (
-	"context"
 	"fmt"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/contracts/mars/creditmanager"
 	marsperps "github.com/margined-protocol/locust-core/pkg/contracts/mars/perps"
@@ -12,6 +10,8 @@ import (
 	subaccounts "github.com/margined-protocol/locust-core/pkg/proto/dydx/subaccounts/types"
 	"github.com/margined-protocol/locust-core/pkg/types"
 	"go.uber.org/zap"
+
+	sdkmath "cosmossdk.io/math"
 )
 
 // ProviderType represents supported perps providers
@@ -35,7 +35,6 @@ func GetProvider(provider string) ProviderType {
 
 // ProviderFactory creates perps providers
 func CreateProvider(
-	ctx context.Context,
 	providerType ProviderType,
 	logger *zap.Logger,
 	config map[string]interface{},
