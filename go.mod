@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	cosmossdk.io/errors v1.0.1 // indirect
-	cosmossdk.io/math v1.5.0
+	cosmossdk.io/math v1.5.3
 	github.com/BurntSushi/toml v1.5.0
 	github.com/CosmWasm/wasmd v0.53.2
 	github.com/cenkalti/backoff/v4 v4.3.0
@@ -88,7 +88,6 @@ require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/ckaznocha/intrange v0.3.1 // indirect
-	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240606204812-0bbfbd93a7ce // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
