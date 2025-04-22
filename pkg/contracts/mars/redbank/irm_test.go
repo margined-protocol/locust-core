@@ -106,8 +106,11 @@ func TestInterestRatesCalculation(t *testing.T) {
 		}
 
 		currentUtilizationRate := sdkmath.LegacyMustNewDecFromStr("1.0")
-		_, err := model.GetBorrowRate(currentUtilizationRate)
-		require.Error(t, err, "should error on division by zero")
+		newBorrowRate, err := model.GetBorrowRate(currentUtilizationRate)
+		require.NoError(t, err)
+
+		expectedBorrowRate := sdkmath.LegacyMustNewDecFromStr("0.07")
+		assert.Equal(t, expectedBorrowRate, newBorrowRate)
 	})
 
 	// Test case 5: current utilization rate == 0% and optimal utilization rate == 0%

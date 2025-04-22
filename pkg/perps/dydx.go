@@ -550,7 +550,7 @@ func (m *DydxProvider) WithdrawSubaccount(_ context.Context, amount sdkmath.Int)
 // GetLiquidationPrice implements Provider
 func (m *DydxProvider) GetLiquidationPrice(equity, size, entryPrice, maintenanceMargin sdkmath.LegacyDec) sdkmath.LegacyDec {
 	// If no position, return zero
-	if size.IsZero() {
+	if size.IsZero() || equity.IsZero() {
 		return sdkmath.LegacyZeroDec()
 	}
 

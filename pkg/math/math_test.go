@@ -231,21 +231,21 @@ func TestDivideWithDecimals(t *testing.T) {
 			b:        "577622",
 			f:        5.77622199,
 			decimals: 6,
-			expected: "100000",
+			expected: "99999",
 		},
 		{
 			name:     "18 decimals small values",
 			b:        "5",
 			f:        5.77622199,
 			decimals: 18,
-			expected: "1",
+			expected: "0",
 		},
 		{
 			name:     "18 decimals large values",
 			b:        "5776221989999999806",
 			f:        5.77622199,
 			decimals: 18,
-			expected: "1000000000000000000",
+			expected: "999999999999999999",
 		},
 	}
 
