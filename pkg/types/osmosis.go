@@ -15,17 +15,17 @@ type LendLeaseStrategyConfig struct {
 	// Vault contracts
 	Vault LocustVault `toml:"vault" mapstructure:"vault"`
 
-	MinRateDeltaBPS       uint64 `toml:"min_rate_delta_bps" mapstructure:"min_rate_delta_bps"`
-	MaxRateImpactBPS      uint64 `toml:"max_rate_impact_bps" mapstructure:"max_rate_impact_bps"`
+	MinRateDeltaBPS       int64  `toml:"min_rate_delta_bps" mapstructure:"min_rate_delta_bps"`
+	MaxRateImpactBPS      int64  `toml:"max_rate_impact_bps" mapstructure:"max_rate_impact_bps"`
 	MinRebalanceAmount    uint64 `toml:"min_rebalance_amount" mapstructure:"min_rebalance_amount"`
 	MaxRebalanceAmount    uint64 `toml:"max_rebalance_amount" mapstructure:"max_rebalance_amount"`
 	MaxRepaymentAmount    uint64 `toml:"max_repayment_amount" mapstructure:"max_repayment_amount"`
 	MinDistributionAmount uint64 `toml:"min_distribution_amount" mapstructure:"min_distribution_amount"`
 
 	// Cycle Params
-	RebalanceInterval uint64 `toml:"rebalance_interval" mapstructure:"rebalance_interval"`
-	RepaymentInterval uint64 `toml:"repayment_interval" mapstructure:"repayment_interval"`
-	SweepInterval     uint64 `toml:"sweep_interval" mapstructure:"sweep_interval"`
+	RebalanceInterval int64 `toml:"rebalance_interval" mapstructure:"rebalance_interval"`
+	RepaymentInterval int64 `toml:"repayment_interval" mapstructure:"repayment_interval"`
+	SweepInterval     int64 `toml:"sweep_interval" mapstructure:"sweep_interval"`
 }
 
 type CLMMStrategyConfig struct {
