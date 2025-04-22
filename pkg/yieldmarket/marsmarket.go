@@ -9,6 +9,7 @@ import (
 	cm "github.com/margined-protocol/locust-core/pkg/contracts/mars/creditmanager"
 	rb "github.com/margined-protocol/locust-core/pkg/contracts/mars/redbank"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	sdkmath "cosmossdk.io/math"
@@ -33,12 +34,14 @@ type MarsYieldMarket struct {
 	lastUpdated  time.Time
 
 	// IBC Registry
-	IBCRegistry *ibc.ConnectionRegistry
+	transferProvider ibc.TransferProvider
 
 	// Added for TransferFunds method
 	clientRegistry *conn.ClientRegistry
 	signerAccount  string
 	senderAddress  string
+
+	logger *zap.Logger
 }
 
 // NewMarsYieldMarket creates a new Mars market implementation
@@ -51,22 +54,24 @@ func NewMarsYieldMarket(
 	creditAccount uint64,
 	connection *grpc.ClientConn,
 	clientRegistry *conn.ClientRegistry,
-	ibcRegistry *ibc.ConnectionRegistry,
+	transferProvider ibc.TransferProvider,
 	signerAccount string,
 	senderAddress string,
+	logger *zap.Logger,
 ) *MarsYieldMarket {
 	return &MarsYieldMarket{
-		ChainID:        chainID,
-		Prefix:         prefix,
-		OracleDenom:    oracleDenom,
-		Redbank:        redbank,
-		CreditManager:  creditManager,
-		CreditAccount:  creditAccount,
-		Connection:     connection,
-		IBCRegistry:    ibcRegistry,
-		clientRegistry: clientRegistry,
-		signerAccount:  signerAccount,
-		senderAddress:  senderAddress,
+		ChainID:          chainID,
+		Prefix:           prefix,
+		OracleDenom:      oracleDenom,
+		Redbank:          redbank,
+		CreditManager:    creditManager,
+		CreditAccount:    creditAccount,
+		Connection:       connection,
+		transferProvider: transferProvider,
+		clientRegistry:   clientRegistry,
+		signerAccount:    signerAccount,
+		senderAddress:    senderAddress,
+		logger:           logger,
 	}
 }
 
@@ -87,26 +92,28 @@ func (m *MarsYieldMarket) GetDenom() string {
 
 // refreshMarketData ensures we have up-to-date market data
 func (m *MarsYieldMarket) refreshMarketData(ctx context.Context) error {
-	// If data is less than 60 seconds old, don't refresh
-	if m.cachedMarket != nil && time.Since(m.lastUpdated) < 60*time.Second {
+	return retry(DefaultRetryAmount, 1*time.Second, *m.logger, func() error {
+		// If data is less than 60 seconds old, don't refresh
+		if m.cachedMarket != nil && time.Since(m.lastUpdated) < 60*time.Second {
+			return nil
+		}
+
+		// Fetch updated market data
+		redbankClient := rb.NewQueryClient(m.Connection, m.Redbank)
+		market, err := redbankClient.MarketV2(
+			ctx,
+			&rb.MarketV2Request{
+				Denom: m.OracleDenom,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to fetch market data: %w", err)
+		}
+
+		m.cachedMarket = market
+		m.lastUpdated = time.Now()
 		return nil
-	}
-
-	// Fetch updated market data
-	redbankClient := rb.NewQueryClient(m.Connection, m.Redbank)
-	market, err := redbankClient.MarketV2(
-		ctx,
-		&rb.MarketV2Request{
-			Denom: m.OracleDenom,
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("failed to fetch market data: %w", err)
-	}
-
-	m.cachedMarket = market
-	m.lastUpdated = time.Now()
-	return nil
+	})
 }
 
 // GetCurrentRate returns the current interest/liquidity rate
@@ -151,34 +158,50 @@ func (m *MarsYieldMarket) GetTotalDebt(ctx context.Context) (sdkmath.Int, error)
 	return debt, nil
 }
 
-// GetLentPosition returns the total amount lent including interest
+// GetLentPosition fetches the lent position with retry logic
 func (m *MarsYieldMarket) GetLentPosition(ctx context.Context) (sdkmath.Int, error) {
-	// Fetch credit positions
-	if m.Connection == nil {
-		return sdkmath.ZeroInt(), fmt.Errorf("connection not initialized")
-	}
+	m.logger.Debug("📊 Getting lent position for market", zap.String("market", m.ChainID))
 
-	// Fetch credit positions
-	creditClient := cm.NewQueryClient(m.Connection, m.CreditManager)
-
-	creditPosition, err := creditClient.Positions(
-		ctx,
-		&cm.PositionsRequest{
-			AccountID: fmt.Sprintf("%v", m.CreditAccount),
-		},
-	)
-	if err != nil {
-		return sdkmath.Int{}, fmt.Errorf("failed to fetch credit accounts: %w", err)
-	}
-
-	// Find our lend position in this market
-	for _, lend := range creditPosition.Lends {
-		if lend.Denom == m.OracleDenom {
-			return lend.Amount, nil
+	lentAmount := sdkmath.ZeroInt()
+	err := retry(4, 2*time.Second, *m.logger, func() error {
+		// Actual logic to get the lent position
+		// Fetch credit positions
+		if m.Connection == nil {
+			return fmt.Errorf("connection not initialized")
 		}
+		if m.CreditManager == "" {
+			return fmt.Errorf("credit manager address not set")
+		}
+
+		// Fetch credit positions
+		creditClient := cm.NewQueryClient(m.Connection, m.CreditManager)
+		creditPosition, err := creditClient.Positions(
+			ctx,
+			&cm.PositionsRequest{
+				AccountID: fmt.Sprintf("%v", m.CreditAccount),
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to fetch credit accounts: %w", err)
+		}
+
+		// Find our lend position in this market
+		for _, lend := range creditPosition.Lends {
+			if lend.Denom == m.OracleDenom {
+				lentAmount = lend.Amount
+				return nil
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return sdkmath.ZeroInt(), err
 	}
 
-	return sdkmath.ZeroInt(), nil
+	m.logger.Debug("📊 Got lent position for market", zap.String("market", m.ChainID), zap.String("amount", lentAmount.String()))
+
+	return lentAmount, nil
 }
 
 // CalculateRateWithUtilization simulates the rate after changing utilization
@@ -375,48 +398,19 @@ func (m *MarsYieldMarket) WithdrawFunds(_ context.Context, amount sdkmath.Int) s
 // TransferFunds executes a transfer between markets
 func (m *MarsYieldMarket) TransferFunds(ctx context.Context, source, destination, receiver string, amount sdkmath.Int) []sdk.Msg {
 	// Create withdrawal message
-	// Prepare sender and receiver addresses
-	client, err := m.clientRegistry.GetClient(m.ChainID, false)
-	if err != nil {
-		return nil
-	}
-
-	// Get the signer account
-	_, sender, err := conn.GetSignerAccountAndAddress(client.Client, m.signerAccount, m.Prefix)
-	if err != nil {
-		return nil
-	}
-
-	coin := sdk.NewCoin(m.OracleDenom, amount)
-
 	withdrawMsg := m.WithdrawFunds(ctx, amount)
 
-	// Get the IBC connection for this destination
-	conn, err := m.IBCRegistry.GetConnection(source, destination)
-	if err != nil {
-		return nil
-	}
+	// Setup coin to transfer
+	coin := sdk.NewCoin(m.OracleDenom, amount)
 
-	var chainID string
-	if conn.Transfer.Forward != nil {
-		chainID = conn.Transfer.Forward.ChainID
-	} else {
-		chainID = destination
-	}
-
-	blockHeight, err := m.clientRegistry.GetHeight(ctx, chainID)
-	if err != nil {
-		return nil
-	}
-
-	// Create transfer message with proper IBC parameters
-	transferMsg, err := ibc.CreateTransferWithMemo(
-		conn.Transfer,
-		source, destination,
-		coin,
-		uint64(*blockHeight),
-		sender, receiver,
-	)
+	transferMsg, err := m.transferProvider.CreateTransferMsg(ctx, &ibc.TransferRequest{
+		SourceChain:      source,
+		DestinationChain: destination,
+		Amount:           coin,
+		Timeout:          10,
+		Sender:           m.senderAddress,
+		Receiver:         receiver,
+	})
 	if err != nil {
 		return nil
 	}

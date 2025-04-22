@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	neutronfeetypes "github.com/margined-protocol/locust-core/pkg/proto/feerefunder/types"
-	neutrontransfertypes "github.com/margined-protocol/locust-core/pkg/proto/transfer/types"
+	neutronfeetypes "github.com/margined-protocol/locust-core/pkg/proto/neutron/feerefunder/types"
+	neutrontransfertypes "github.com/margined-protocol/locust-core/pkg/proto/neutron/transfer/types"
 
 	sdkmath "cosmossdk.io/math"
 
@@ -24,7 +24,7 @@ type Connection struct {
 	ForwardPrefix string
 }
 
-// Transfer represents an IBC connection between two chains
+// IBCTransfer represents an IBC connection between two chains
 type Transfer struct {
 	SourceChainID string   // Chain ID of the source chain (e.g., "osmosis-1")
 	DestChainID   string   // Chain ID of the destination chain (e.g., "neutron-1")
@@ -172,13 +172,13 @@ func CreateTransferMsg(port, channel, memo, sender, receiver string, token sdk.C
 // CreateTransferWithMemo creates an IBC transfer message with a memo if forwarding
 func CreateTransferWithMemo(
 	conn *Transfer,
-	sourceChainID, destChainID string,
+	sourceChainID string,
 	coin sdk.Coin,
 	blockHeight uint64,
 	sender, receiver string,
 ) (sdk.Msg, error) {
 	// Create memo and determine receiver based on connection type
-	memo, receiver, err := CreateForwardMemo(conn, receiver, destChainID)
+	memo, receiver, err := CreateForwardMemo(conn, receiver)
 	if err != nil {
 		return nil, err
 	}
@@ -222,13 +222,22 @@ func CreateTransferWithMemo(
 func CreateForwardMemo(
 	conn *Transfer,
 	receiver string,
-	_ string,
 ) (string, string, error) {
+	// Validate inputs
+	if conn == nil {
+		return "", "", fmt.Errorf("connection configuration is nil")
+	}
+
 	var memo, finalReceiver string
 
 	// For forwarded IBC transfers (passing through an intermediary chain)
 	if conn.Forward != nil {
 		finalReceiver = conn.Forward.Receiver
+
+		// Validate forward receiver is not empty
+		if finalReceiver == "" {
+			return "", "", fmt.Errorf("forward receiver address is empty")
+		}
 
 		forwardInfo := ForwardInfo{
 			Channel:  conn.Forward.Channel,

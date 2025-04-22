@@ -48,7 +48,7 @@ func NewClientRegistry(logger *zap.Logger, signerAccount string) *ClientRegistry
 }
 
 // RegisterClient adds a new chain client to the registry
-func (r *ClientRegistry) RegisterClient(_ context.Context, _ *zap.Logger, chain *types.Chain, key *types.SigningKey) error {
+func (r *ClientRegistry) RegisterClient(chain *types.Chain, key *types.SigningKey) error {
 	if _, exists := r.chains[chain.ChainID]; exists {
 		return fmt.Errorf("chain %s already registered", chain.ChainID)
 	}

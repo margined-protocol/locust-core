@@ -15,6 +15,12 @@ type TransferProvider interface {
 	// If the WaitForCompletion flag is set to true in the request, this method will block
 	// until the transfer is completed or the timeout is reached.
 	Transfer(ctx context.Context, request *TransferRequest) (*TransferResult, error)
+
+	// CreateTransferMsg creates an IBC transfer message
+	CreateTransferMsg(ctx context.Context, request *TransferRequest) (sdk.Msg, error)
+
+	// ProcessTransferMsg processes a transfer message
+	ProcessTransferMsg(ctx context.Context, request *TransferRequest, transferMsg sdk.Msg) (*TransferResult, error)
 }
 
 // MessageHandler is a callback function to execute messages

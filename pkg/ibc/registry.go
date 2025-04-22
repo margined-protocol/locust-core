@@ -19,11 +19,28 @@ func NewConnectionRegistry() *ConnectionRegistry {
 
 // DefaultConnectionRegistry creates a new registry
 func DefaultConnectionRegistry() *ConnectionRegistry {
-	osmosisToNeutron := &Connection{
+	dydxToOsmosis := &Connection{
 		Transfer: &Transfer{
-			SourceChainID: "osmosis-1",   // Mainnet chain ID
-			DestChainID:   "neutron-1",   // Mainnet chain ID
-			Channel:       "channel-750", // Noble
+			SourceChainID: "dydx-mainnet-1",
+			DestChainID:   "osmosis-1",
+			Channel:       "channel-0",
+			Port:          "transfer",
+			Forward: &Forward{
+				ChainID: "noble-1",
+				Port:    "transfer",
+				Channel: "channel-1",
+			},
+		},
+		SourcePrefix:  "dydx",
+		DestPrefix:    "neutron",
+		ForwardPrefix: "noble",
+	}
+
+	dydxToNeutron := &Connection{
+		Transfer: &Transfer{
+			SourceChainID: "dydx-mainnet-1",
+			DestChainID:   "neutron-1",
+			Channel:       "channel-0",
 			Port:          "transfer",
 			Forward: &Forward{
 				ChainID: "noble-1",
@@ -31,7 +48,7 @@ func DefaultConnectionRegistry() *ConnectionRegistry {
 				Channel: "channel-18",
 			},
 		},
-		SourcePrefix:  "osmo",
+		SourcePrefix:  "dydx",
 		DestPrefix:    "neutron",
 		ForwardPrefix: "noble",
 	}
@@ -53,23 +70,6 @@ func DefaultConnectionRegistry() *ConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	dydxToNeutron := &Connection{
-		Transfer: &Transfer{
-			SourceChainID: "dydx-mainnet-1",
-			DestChainID:   "neutron-1",
-			Channel:       "channel-0",
-			Port:          "transfer",
-			Forward: &Forward{
-				ChainID: "noble-1",
-				Port:    "transfer",
-				Channel: "channel-18",
-			},
-		},
-		SourcePrefix:  "dydx",
-		DestPrefix:    "neutron",
-		ForwardPrefix: "noble",
-	}
-
 	neutronToDydx := &Connection{
 		Transfer: &Transfer{
 			SourceChainID: "neutron-1",
@@ -87,20 +87,20 @@ func DefaultConnectionRegistry() *ConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
-	dydxToOsmosis := &Connection{
+	neutronToUmee := &Connection{
 		Transfer: &Transfer{
-			SourceChainID: "dydx-mainnet-1",
-			DestChainID:   "osmosis-1",
-			Channel:       "channel-0",
+			SourceChainID: "neutron-1",
+			DestChainID:   "umee-1",
+			Channel:       "channel-30",
 			Port:          "transfer",
 			Forward: &Forward{
 				ChainID: "noble-1",
 				Port:    "transfer",
-				Channel: "channel-1",
+				Channel: "channel-33",
 			},
 		},
-		SourcePrefix:  "dydx",
-		DestPrefix:    "neutron",
+		SourcePrefix:  "neutron",
+		DestPrefix:    "dydx",
 		ForwardPrefix: "noble",
 	}
 
@@ -121,19 +121,93 @@ func DefaultConnectionRegistry() *ConnectionRegistry {
 		ForwardPrefix: "noble",
 	}
 
+	osmosisToNeutron := &Connection{
+		Transfer: &Transfer{
+			SourceChainID: "osmosis-1",   // Mainnet chain ID
+			DestChainID:   "neutron-1",   // Mainnet chain ID
+			Channel:       "channel-750", // Noble
+			Port:          "transfer",
+			Forward: &Forward{
+				ChainID: "noble-1",
+				Port:    "transfer",
+				Channel: "channel-18",
+			},
+		},
+		SourcePrefix:  "osmo",
+		DestPrefix:    "neutron",
+		ForwardPrefix: "noble",
+	}
+
+	osmosisToUmee := &Connection{
+		Transfer: &Transfer{
+			SourceChainID: "osmosis-1",   // Mainnet chain ID
+			DestChainID:   "umee-1",      // Mainnet chain ID
+			Channel:       "channel-750", // Noble
+			Port:          "transfer",
+			Forward: &Forward{
+				ChainID: "noble-1",
+				Port:    "transfer",
+				Channel: "channel-51",
+			},
+		},
+		SourcePrefix:  "osmo",
+		DestPrefix:    "umee",
+		ForwardPrefix: "noble",
+	}
+
+	umeeToOsmosis := &Connection{
+		Transfer: &Transfer{
+			SourceChainID: "umee-1",
+			DestChainID:   "osmosis-1",
+			Channel:       "channel-120",
+			Port:          "transfer",
+			Forward: &Forward{
+				ChainID: "noble-1",
+				Port:    "transfer",
+				Channel: "channel-1",
+			},
+		},
+		SourcePrefix:  "umee",
+		DestPrefix:    "osmo",
+		ForwardPrefix: "noble",
+	}
+
+	umeeToNeutron := &Connection{
+		Transfer: &Transfer{
+			SourceChainID: "umee-1",
+			DestChainID:   "osmosis-1",
+			Channel:       "channel-51",
+			Port:          "transfer",
+			Forward: &Forward{
+				ChainID: "noble-1",
+				Port:    "transfer",
+				Channel: "channel-1",
+			},
+		},
+		SourcePrefix:  "umee",
+		DestPrefix:    "osmo",
+		ForwardPrefix: "noble",
+	}
+
 	return &ConnectionRegistry{
 		connections: map[string]map[string]*Connection{
 			"osmosis-1": {
 				"neutron-1":      osmosisToNeutron,
 				"dydx-mainnet-1": osmosisToDydx,
+				"umee-1":         osmosisToUmee,
 			},
 			"neutron-1": {
 				"osmosis-1":      neutronToOsmosis,
 				"dydx-mainnet-1": neutronToDydx,
+				"umee-1":         neutronToUmee,
 			},
 			"dydx-mainnet-1": {
 				"neutron-1": dydxToNeutron,
 				"osmosis-1": dydxToOsmosis,
+			},
+			"umee-1": {
+				"osmosis-1": umeeToOsmosis,
+				"neutron-1": umeeToNeutron,
 			},
 		},
 	}

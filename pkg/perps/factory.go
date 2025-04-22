@@ -1,14 +1,13 @@
 package perps
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/contracts/mars/creditmanager"
 	marsperps "github.com/margined-protocol/locust-core/pkg/contracts/mars/perps"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
-	subaccounts "github.com/margined-protocol/locust-core/pkg/proto/subaccounts/types"
+	subaccounts "github.com/margined-protocol/locust-core/pkg/proto/dydx/subaccounts/types"
 	"github.com/margined-protocol/locust-core/pkg/types"
 	"go.uber.org/zap"
 
@@ -36,7 +35,6 @@ func GetProvider(provider string) ProviderType {
 
 // ProviderFactory creates perps providers
 func CreateProvider(
-	_ context.Context,
 	providerType ProviderType,
 	logger *zap.Logger,
 	config map[string]interface{},
@@ -150,6 +148,7 @@ func createDydxProvider(logger *zap.Logger, rawConfig map[string]interface{}) (P
 		config.StepBaseQuantums,
 		config.QuantumConversionExp,
 		config.AtomicResolution,
+		config.Decimals,
 		config.MinEquity,
 		config.SignerAccount,
 		config.Executor,
@@ -222,6 +221,11 @@ func parseDydxConfig(rawConfig map[string]interface{}) (DydxConfig, error) {
 	config.AtomicResolution, ok = rawConfig["atomic_resolution"].(int64)
 	if !ok {
 		return config, fmt.Errorf("atomic_resolution must be int64")
+	}
+
+	config.Decimals, ok = rawConfig["decimals"].(int64)
+	if !ok {
+		return config, fmt.Errorf("decimals must be int64")
 	}
 
 	config.SubticksPerTick, ok = rawConfig["subticks_per_tick"].(uint64)

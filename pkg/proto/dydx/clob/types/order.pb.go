@@ -8,7 +8,7 @@ import (
 	fmt "fmt"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
-	types "github.com/margined-protocol/locust-core/pkg/proto/subaccounts/types"
+	types "github.com/margined-protocol/locust-core/pkg/proto/dydx/subaccounts/types"
 	io "io"
 	math "math"
 	math_bits "math/bits"

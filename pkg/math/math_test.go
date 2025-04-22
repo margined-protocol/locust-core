@@ -7,9 +7,94 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/test-go/testify/assert"
 
 	sdkmath "cosmossdk.io/math"
 )
+
+// TestInterpolate tests the interpolation function used in interest rate calculations
+func TestInterpolate(t *testing.T) {
+	testCases := []struct {
+		name     string
+		x        string
+		x1       string
+		y1       string
+		x2       string
+		y2       string
+		expected string
+	}{
+		{
+			name:     "Middle point",
+			x:        "3.0",
+			x1:       "3.0",
+			y1:       "11.1",
+			x2:       "6.0",
+			y2:       "17.4",
+			expected: "11.1",
+		},
+		{
+			name:     "Middle point",
+			x:        "0.5",
+			x1:       "0.0",
+			y1:       "0.0",
+			x2:       "1.0",
+			y2:       "1.0",
+			expected: "0.5",
+		},
+		{
+			name:     "Equal x values should return y1",
+			x:        "0.5",
+			x1:       "0.5",
+			y1:       "0.3",
+			x2:       "0.5",
+			y2:       "0.7",
+			expected: "0.3",
+		},
+		{
+			name:     "Interest rate kink interpolation",
+			x:        "0.5",
+			x1:       "0.0",
+			y1:       "0.02",
+			x2:       "0.8",
+			y2:       "0.22",
+			expected: "0.145",
+		},
+		{
+			name:     "Interest rate above kink",
+			x:        "0.85",
+			x1:       "0.8",
+			y1:       "0.22",
+			x2:       "0.9",
+			y2:       "1.52",
+			expected: "0.87",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Parse values
+			x, _ := sdkmath.LegacyNewDecFromStr(tc.x)
+			x1, _ := sdkmath.LegacyNewDecFromStr(tc.x1)
+			y1, _ := sdkmath.LegacyNewDecFromStr(tc.y1)
+			x2, _ := sdkmath.LegacyNewDecFromStr(tc.x2)
+			y2, _ := sdkmath.LegacyNewDecFromStr(tc.y2)
+			expected, _ := sdkmath.LegacyNewDecFromStr(tc.expected)
+
+			// Call interpolate function
+			result := Interpolate(x, x1, y1, x2, y2)
+
+			// Check with small tolerance for floating point errors
+			delta := sdkmath.LegacyNewDecWithPrec(1, 6) // 0.000001 tolerance
+
+			assert.InDelta(t,
+				expected.MustFloat64(),
+				result.MustFloat64(),
+				delta.MustFloat64(),
+				"Interpolation from (%s,%s) to (%s,%s) at x=%s should be %s, got %s",
+				tc.x1, tc.y1, tc.x2, tc.y2, tc.x, tc.expected, result.String())
+		})
+	}
+}
 
 func TestRoundToNearestTickSpacing(t *testing.T) {
 	tests := []struct {
@@ -70,96 +155,199 @@ func TestRoundToNearestTickSpacing(t *testing.T) {
 	}
 }
 
-func TestMultiplyWithDecimals(t *testing.T) {
+func TestDivideWithDecimals(t *testing.T) {
 	tests := []struct {
 		name     string
-		f        float64
-		b        string // big.Int value as string
+		b        string  // big.Int value as string
+		f        float64 // divisor
 		decimals int
+		expected string // expected result as string
+	}{
+		{
+			name:     "Simple division",
+			b:        "150",
+			f:        1.5,
+			decimals: 2,
+			expected: "100",
+		},
+		{
+			name:     "Small float, large int",
+			b:        "250000",
+			f:        0.25,
+			decimals: 6,
+			expected: "1000000",
+		},
+		{
+			name:     "Large float, small int",
+			b:        "123456",
+			f:        12345.6789,
+			decimals: 4,
+			expected: "0009",
+		},
+		{
+			name:     "Zero float",
+			b:        "1000",
+			f:        0.0,
+			decimals: 3,
+			expected: "0", // Division by zero should be handled appropriately
+		},
+		{
+			name:     "Zero big.Int",
+			b:        "0",
+			f:        1.234,
+			decimals: 3,
+			expected: "0",
+		},
+		{
+			name:     "Negative float",
+			b:        "250",
+			f:        -2.5,
+			decimals: 2,
+			expected: "-100",
+		},
+		{
+			name:     "Negative big.Int",
+			b:        "-250",
+			f:        2.5,
+			decimals: 2,
+			expected: "-100",
+		},
+		{
+			name:     "Both negative",
+			b:        "-250",
+			f:        -2.5,
+			decimals: 2,
+			expected: "100",
+		},
+		{
+			name:     "No decimals",
+			b:        "250",
+			f:        2.5,
+			decimals: 0,
+			expected: "100",
+		},
+		{
+			name:     "Worked example",
+			b:        "577622",
+			f:        5.77622199,
+			decimals: 6,
+			expected: "99999",
+		},
+		{
+			name:     "18 decimals small values",
+			b:        "5",
+			f:        5.77622199,
+			decimals: 18,
+			expected: "0",
+		},
+		{
+			name:     "18 decimals large values",
+			b:        "5776221989999999806",
+			f:        5.77622199,
+			decimals: 18,
+			expected: "999999999999999999",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Convert input b and expected values to big.Int
+			b := new(big.Int)
+			b.SetString(tt.b, 10)
+
+			expected := new(big.Int)
+			expected.SetString(tt.expected, 10)
+
+			// Call the function
+			result := DivideWithDecimals(tt.f, b, tt.decimals)
+
+			// Compare the result
+			if result.Cmp(expected) != 0 {
+				t.Errorf("DivideWithDecimals(%v, %v, %d) = %v; want %v",
+					tt.b, tt.f, tt.decimals, result.String(), tt.expected)
+			}
+		})
+	}
+}
+
+func TestMultiplyWithDecimals(t *testing.T) {
+	tests := []struct {
+		name string
+		f    float64
+		b    string // big.Int value as string
+
 		expected string // expected result as string
 	}{
 		{
 			name:     "Simple multiplication",
 			f:        1.5,
 			b:        "100",
-			decimals: 2,
 			expected: "150",
 		},
 		{
 			name:     "Small float, large int",
 			f:        0.25,
 			b:        "1000000",
-			decimals: 6,
 			expected: "250000",
 		},
 		{
 			name:     "Large float, small int",
 			f:        12345.6789,
 			b:        "0010",
-			decimals: 4,
 			expected: "123456",
 		},
 		{
 			name:     "Zero float",
 			f:        0.0,
 			b:        "1000",
-			decimals: 3,
 			expected: "0",
 		},
 		{
 			name:     "Zero big.Int",
 			f:        1.234,
 			b:        "0",
-			decimals: 3,
 			expected: "0",
 		},
 		{
 			name:     "Negative float",
 			f:        -2.5,
 			b:        "100",
-			decimals: 2,
 			expected: "-250",
 		},
 		{
 			name:     "Negative big.Int",
 			f:        2.5,
 			b:        "-100",
-			decimals: 2,
 			expected: "-250",
 		},
 		{
 			name:     "Both negative",
 			f:        -2.5,
 			b:        "-100",
-			decimals: 2,
 			expected: "250",
 		},
 		{
 			name:     "No decimals",
 			f:        2.5,
 			b:        "100",
-			decimals: 0,
 			expected: "250",
 		},
 		{
 			name:     "Worked example",
 			f:        5.77622199,
 			b:        "100000",
-			decimals: 6,
 			expected: "577622",
 		},
 		{
 			name:     "18 decimals small values",
 			f:        5.77622199,
 			b:        "1",
-			decimals: 18,
 			expected: "5",
 		},
 		{
 			name:     "18 decimals small values",
 			f:        5.77622199,
 			b:        "1000000000000000000",
-			decimals: 18,
 			expected: "5776221989999999806",
 		},
 	}
@@ -174,12 +362,12 @@ func TestMultiplyWithDecimals(t *testing.T) {
 			expected.SetString(tt.expected, 10)
 
 			// Call the function
-			result := MultiplyWithDecimals(tt.f, b, tt.decimals)
+			result := MultiplyWithDecimals(tt.f, b)
 
 			// Compare the result
 			if result.Cmp(expected) != 0 {
-				t.Errorf("MultiplyWithDecimals(%v, %v, %d) = %v; want %v",
-					tt.f, tt.b, tt.decimals, result.String(), tt.expected)
+				t.Errorf("MultiplyWithDecimals(%v, %v) = %v; want %v",
+					tt.f, tt.b, result.String(), tt.expected)
 			}
 		})
 	}

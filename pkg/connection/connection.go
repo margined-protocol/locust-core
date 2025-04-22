@@ -209,7 +209,7 @@ func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string) (*rp
 	return client, client, nil
 }
 
-// InitCosmosClient initialises a cosmosclient for executing transactions - using auto gas estimation and prices
+// InitCosmosClient initializes a Cosmos client with retry logic
 func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, key *types.SigningKey) (*cosmosclient.Client, error) {
 	opts := []cosmosclient.Option{
 		cosmosclient.WithNodeAddress(chain.RPCServerAddress),

@@ -2,13 +2,15 @@ package types
 
 type LendLeaseStrategyConfig struct {
 	ChainID string `toml:"chain_id" mapstructure:"chain_id"`
-
+	Kill    bool   `toml:"kill" mapstructure:"kill"`
 	// Eventually I think we should just have a single chain config and then a list of chains
 	Osmosis     Chain      `toml:"osmosis" mapstructure:"osmosis"`
 	Neutron     Chain      `toml:"neutron" mapstructure:"neutron"`
 	Noble       Chain      `toml:"noble" mapstructure:"noble"`
+	Umee        Chain      `toml:"umee" mapstructure:"umee"`
 	MarsOsmosis MarsConfig `toml:"mars_osmosis" mapstructure:"mars_osmosis"`
 	MarsNeutron MarsConfig `toml:"mars_neutron" mapstructure:"mars_neutron"`
+	UmeeMarket  UmeeConfig `toml:"umee_market" mapstructure:"umee_market"`
 
 	// Vault contracts
 	Vault LocustVault `toml:"vault" mapstructure:"vault"`
@@ -19,12 +21,18 @@ type LendLeaseStrategyConfig struct {
 	MaxRebalanceAmount    uint64 `toml:"max_rebalance_amount" mapstructure:"max_rebalance_amount"`
 	MaxRepaymentAmount    uint64 `toml:"max_repayment_amount" mapstructure:"max_repayment_amount"`
 	MinDistributionAmount uint64 `toml:"min_distribution_amount" mapstructure:"min_distribution_amount"`
+
+	// Cycle Params
+	RebalanceInterval uint64 `toml:"rebalance_interval" mapstructure:"rebalance_interval"`
+	RepaymentInterval uint64 `toml:"repayment_interval" mapstructure:"repayment_interval"`
+	SweepInterval     uint64 `toml:"sweep_interval" mapstructure:"sweep_interval"`
 }
 
 type CLMMStrategyConfig struct {
 	DefaultToken0Amount SdkInt `toml:"default_token_0_amount" mapstructure:"default_token_0_amount"`
 	DefaultToken1Amount SdkInt `toml:"default_token_1_amount" mapstructure:"default_token_1_amount"`
 	ChainID             string `toml:"chain_id" mapstructure:"chain_id"`
+	Kill                bool   `toml:"kill" mapstructure:"kill"`
 	Granter             string `toml:"granter" mapstructure:"granter"`
 	Pool                Pool   `toml:"pool" mapstructure:"pool"`
 
