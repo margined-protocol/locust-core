@@ -12,7 +12,7 @@ require (
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-sdk v0.50.13
 	github.com/google/uuid v1.6.0
-	github.com/ignite/cli/v28 v28.8.2
+	github.com/ignite/cli/v28 v28.10.0
 	go.uber.org/zap v1.27.0
 )
 
