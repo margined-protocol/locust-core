@@ -173,6 +173,12 @@ func (r *ClientRegistry) GetSignerAccountAndAddress(signerAccount, chainID strin
 		return nil, "", fmt.Errorf("error getting client: %w", err)
 	}
 
+	r.logger.Info("Getting signer account and address",
+		zap.String("chain_id", chainID),
+		zap.String("signer_account", signerAccount),
+		zap.String("prefix", client.Chain.Prefix),
+	)
+
 	account, sender, err := GetSignerAccountAndAddress(client.Client, signerAccount, client.Chain.Prefix)
 	if err != nil {
 		return nil, "", fmt.Errorf("error getting signer account and address: %w", err)

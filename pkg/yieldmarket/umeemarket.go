@@ -8,6 +8,7 @@ import (
 	conn "github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
 	"github.com/margined-protocol/locust-core/pkg/math"
+
 	// Import Umee leverage module types - you'll need to add these to your go.mod
 	ltypes "github.com/margined-protocol/locust-core/pkg/proto/umee/leverage/types"
 	"go.uber.org/zap"
@@ -88,29 +89,44 @@ func (u *UmeeYieldMarket) GetDenom() string {
 	return u.Denom
 }
 
-// refreshMarketData ensures we have up-to-date market data
-func (u *UmeeYieldMarket) refreshMarketData(ctx context.Context) error {
-	return retry(DefaultRetryAmount, 1*time.Second, *u.logger, func() error {
+// Standalone function to refresh market data
+func RefreshMarketData(ctx context.Context, connection *grpc.ClientConn, denom string, logger *zap.Logger) (*ltypes.QueryMarketSummaryResponse, error) {
+	var cachedMarket *ltypes.QueryMarketSummaryResponse
+	var lastUpdated time.Time
+
+	err := retry(DefaultRetryAmount, 1*time.Second, *logger, func() error {
 		// If data is less than 60 seconds old, don't refresh
-		if u.cachedMarket != nil && time.Since(u.lastUpdated) < 60*time.Second {
+		if cachedMarket != nil && time.Since(lastUpdated) < 60*time.Second {
 			return nil
 		}
 
 		// Create Umee leverage query client
-		queryClient := ltypes.NewQueryClient(u.Connection)
+		queryClient := ltypes.NewQueryClient(connection)
 
 		// Fetch updated market data
 		marketResp, err := queryClient.MarketSummary(ctx, &ltypes.QueryMarketSummary{
-			Denom: u.Denom,
+			Denom: denom,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to fetch market data: %w", err)
 		}
 
-		u.cachedMarket = marketResp
-		u.lastUpdated = time.Now()
+		cachedMarket = marketResp
+		lastUpdated = time.Now()
 		return nil
 	})
+
+	return cachedMarket, err
+}
+
+// Update the UmeeYieldMarket method to use the standalone function
+func (u *UmeeYieldMarket) refreshMarketData(ctx context.Context) error {
+	marketData, err := RefreshMarketData(ctx, u.Connection, u.Denom, u.logger)
+	if err != nil {
+		return err
+	}
+	u.cachedMarket = marketData
+	return nil
 }
 
 // refreshTokenData ensures we have up-to-date token data
