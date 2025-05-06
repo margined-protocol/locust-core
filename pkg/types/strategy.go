@@ -157,6 +157,7 @@ type HedgeConfig struct {
 	TokenOutDecimals  int     `json:"token_out_decimals" mapstructure:"token_out_decimals"`   // decimals of token_out
 	MarginThreshold   int64   `json:"margin_threshold" mapstructure:"margin_threshold"`       // BPS proximity to liquidation price we accept prior to adding more margin
 	Expiration        string  `json:"expiration" mapstructure:"expiration"`                   // expiration of hedge as date `YYYY-MM-DD HH:MM:SS`
+	Receiver          string  `json:"receiver" mapstructure:"receiver"`                       // receiver of funds
 }
 
 type MarsConfig struct {

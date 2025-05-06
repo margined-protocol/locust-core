@@ -24,8 +24,11 @@ type LendLeaseStrategyConfig struct {
 
 	// Cycle Params
 	RebalanceInterval int64 `toml:"rebalance_interval" mapstructure:"rebalance_interval"`
-	RepaymentInterval int64 `toml:"repayment_interval" mapstructure:"repayment_interval"`
 	SweepInterval     int64 `toml:"sweep_interval" mapstructure:"sweep_interval"`
+
+	// Repayment Schedule
+	RepaymentScheduleHour   int `toml:"repayment_schedule_hour" mapstructure:"repayment_schedule_hour"`
+	RepaymentScheduleMinute int `toml:"repayment_schedule_minute" mapstructure:"repayment_schedule_minute"`
 }
 
 type CLMMStrategyConfig struct {

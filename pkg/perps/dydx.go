@@ -12,7 +12,6 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/margined-protocol/locust-core/pkg/connection"
-	"github.com/margined-protocol/locust-core/pkg/grpc"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
 	"github.com/margined-protocol/locust-core/pkg/math"
 	clob "github.com/margined-protocol/locust-core/pkg/proto/dydx/clob/types"
@@ -249,12 +248,27 @@ func (m *DydxProvider) GetAccountBalance() (sdk.Coins, error) {
 		return nil, err
 	}
 
-	dydxConn, err := grpc.SetupGRPCConnection(cl.Chain.GRPCServerAddress, cl.Chain.GRPCTLS)
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to GRPC server: %w", err)
+	// Try to get the multi-endpoint gRPC client
+	var bankClient banktypes.QueryClient
+	grpcClient, err := m.clientRegistry.GetGRPCClient(DydxChainID)
+	if err == nil && grpcClient != nil {
+		// Use the multi-endpoint client
+		m.logger.Debug("Using multi-endpoint gRPC client for bank query")
+		conn := grpcClient.GetClient()
+		bankClient = banktypes.NewQueryClient(conn)
+	} else {
+		// Fallback to direct connection
+		m.logger.Debug("Using direct gRPC connection for bank query",
+			zap.String("address", cl.Chain.GRPCEndpoints[0].Address))
+		conn, err := connection.SetupGRPCConnection(
+			cl.Chain.GRPCEndpoints[0].Address,
+			cl.Chain.GRPCEndpoints[0].UseTLS,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to connect to GRPC server: %w", err)
+		}
+		bankClient = banktypes.NewQueryClient(conn)
 	}
-
-	bankClient := banktypes.NewQueryClient(dydxConn)
 
 	_, signer, err := m.clientRegistry.GetSignerAccountAndAddress(m.signerAccount, DydxChainID)
 	if err != nil {

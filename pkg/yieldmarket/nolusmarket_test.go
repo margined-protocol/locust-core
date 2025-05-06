@@ -97,7 +97,7 @@ func TestGetPrice(t *testing.T) {
 	).Once()
 
 	// Call the function
-	price, err := market.getPrice(t.Context())
+	price, err := market.getPrice(context.Background())
 
 	// Assertions
 	assert.NoError(t, err)
@@ -114,7 +114,7 @@ func TestGetPrice(t *testing.T) {
 		nil,
 	).Once()
 
-	price, err = market.getPrice(t.Context())
+	price, err = market.getPrice(context.Background())
 	assert.NoError(t, err)
 	assert.NotNil(t, price)
 	assert.Equal(t, "2", price.String()) // 200000000/100000000 = 2
