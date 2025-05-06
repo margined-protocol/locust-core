@@ -57,12 +57,11 @@ type Drop struct {
 	Info  UnbondDrop `toml:"info" mapstructure:"info"`
 }
 
-type PryzmConfig struct {
-	BaseURL      string `toml:"base_url" mapstructure:"base_url"`
-	PoolID       string `toml:"pool_id" mapstructure:"pool_id"`
-	StakingDenom string `toml:"staking_denom" mapstructure:"staking_denom"`
-	LPDenom      string `toml:"lp_denom" mapstructure:"lp_denom"`
-	BaseDenom    string `toml:"base_denom" mapstructure:"base_denom"`
+type UnbondDrop struct {
+	Denom                            string `toml:"denom" mapstructure:"denom"`
+	CoreContractAddress              string `json:"core_contract_address" mapstructure:"core_contract_address"`
+	WithdrawalVoucherContractAddress string `json:"withdrawal_voucher_contract_address" mapstructure:"withdrawal_voucher_contract_address"`
+	WithdrawalManagerContractAddress string `json:"withdrawal_manager_contract_address" mapstructure:"withdrawal_manager_contract_address"`
 }
 
 type Zone struct {
