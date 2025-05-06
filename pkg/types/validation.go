@@ -20,13 +20,6 @@ func ValidateConfig(cfg Config) error {
 	return nil
 }
 
-// Validate checks if any required field is missing or invalid in the GridStrategyConfig struct.
-func (cfg GridStrategyConfig) Validate() error {
-	return validateStructFields(reflect.ValueOf(cfg))
-}
-
-// Helper function to check struct fields
-
 func validateStructField(field reflect.Value) error {
 	if field.Kind() == reflect.Struct {
 		// Recursively check nested structs
