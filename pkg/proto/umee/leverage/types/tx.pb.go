@@ -6,8 +6,9 @@ package types
 import (
 	context "context"
 	fmt "fmt"
-	cosmossdk_io_math "cosmossdk.io/math"
 	_ "github.com/cosmos/cosmos-proto"
+	cosmossdk_io_math "cosmossdk.io/math"
+	// github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/cosmos-sdk/types/msgservice"
 	_ "github.com/cosmos/gogoproto/gogoproto"
@@ -1028,277 +1029,280 @@ func (*MsgSupplyCollateralResponse) XXX_MessageName() string {
 	return "umee.leverage.v1.MsgSupplyCollateralResponse"
 }
 
-// // MsgGovUpdateRegistry defines the Msg/GovUpdateRegistry request type.
-// type MsgGovUpdateRegistry struct {
-// 	// authority is the address of the governance account or the Emergency Group.
-// 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-// 	// description motivating the change. Should be used only when executing by the
-// 	// Emergency Group. Otherwise the x/gov Proposal metadata should be used.
-// 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-// 	// add_tokens defines new token settings.
-// 	AddTokens []Token `protobuf:"bytes,4,rep,name=add_tokens,json=addTokens,proto3" json:"add_tokens"`
-// 	// update_tokens defines the new settings for existed tokens.
-// 	UpdateTokens []Token `protobuf:"bytes,5,rep,name=update_tokens,json=updateTokens,proto3" json:"update_tokens"`
-// }
+// MsgGovUpdateRegistry defines the Msg/GovUpdateRegistry request type.
+type MsgGovUpdateRegistry struct {
+	// authority is the address of the governance account or the Emergency Group.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// description motivating the change. Should be used only when executing by the
+	// Emergency Group. Otherwise the x/gov Proposal metadata should be used.
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// add_tokens defines new token settings.
+	AddTokens []Token `protobuf:"bytes,4,rep,name=add_tokens,json=addTokens,proto3" json:"add_tokens"`
+	// update_tokens defines the new settings for existed tokens.
+	UpdateTokens []Token `protobuf:"bytes,5,rep,name=update_tokens,json=updateTokens,proto3" json:"update_tokens"`
+}
 
-// func (m *MsgGovUpdateRegistry) Reset()      { *m = MsgGovUpdateRegistry{} }
-// func (*MsgGovUpdateRegistry) ProtoMessage() {}
-// func (*MsgGovUpdateRegistry) Descriptor() ([]byte, []int) {
-// 	return fileDescriptor_72683128ee6e8843, []int{22}
-// }
-// func (m *MsgGovUpdateRegistry) XXX_Unmarshal(b []byte) error {
-// 	return m.Unmarshal(b)
-// }
-// func (m *MsgGovUpdateRegistry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-// 	if deterministic {
-// 		return xxx_messageInfo_MsgGovUpdateRegistry.Marshal(b, m, deterministic)
-// 	} else {
-// 		b = b[:cap(b)]
-// 		n, err := m.MarshalToSizedBuffer(b)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return b[:n], nil
-// 	}
-// }
-// func (m *MsgGovUpdateRegistry) XXX_Merge(src proto.Message) {
-// 	xxx_messageInfo_MsgGovUpdateRegistry.Merge(m, src)
-// }
-// func (m *MsgGovUpdateRegistry) XXX_Size() int {
-// 	return m.Size()
-// }
-// func (m *MsgGovUpdateRegistry) XXX_DiscardUnknown() {
-// 	xxx_messageInfo_MsgGovUpdateRegistry.DiscardUnknown(m)
-// }
+func (m *MsgGovUpdateRegistry) Reset()      { *m = MsgGovUpdateRegistry{} }
+func (m *MsgGovUpdateRegistry) String() string { return proto.CompactTextString(m) }
+func (*MsgGovUpdateRegistry) ProtoMessage() {}
+func (*MsgGovUpdateRegistry) Descriptor() ([]byte, []int) {
+	return fileDescriptor_72683128ee6e8843, []int{22}
+}
+func (m *MsgGovUpdateRegistry) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovUpdateRegistry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovUpdateRegistry.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovUpdateRegistry) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovUpdateRegistry.Merge(m, src)
+}
+func (m *MsgGovUpdateRegistry) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovUpdateRegistry) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovUpdateRegistry.DiscardUnknown(m)
+}
 
-// var xxx_messageInfo_MsgGovUpdateRegistry proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovUpdateRegistry proto.InternalMessageInfo
 
-// func (*MsgGovUpdateRegistry) XXX_MessageName() string {
-// 	return "umee.leverage.v1.MsgGovUpdateRegistry"
-// }
+func (*MsgGovUpdateRegistry) XXX_MessageName() string {
+	return "umee.leverage.v1.MsgGovUpdateRegistry"
+}
 
-// // MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
-// type MsgGovUpdateRegistryResponse struct {
-// }
+// MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
+type MsgGovUpdateRegistryResponse struct {
+}
 
-// func (m *MsgGovUpdateRegistryResponse) Reset()         { *m = MsgGovUpdateRegistryResponse{} }
-// func (m *MsgGovUpdateRegistryResponse) String() string { return proto.CompactTextString(m) }
-// func (*MsgGovUpdateRegistryResponse) ProtoMessage()    {}
-// func (*MsgGovUpdateRegistryResponse) Descriptor() ([]byte, []int) {
-// 	return fileDescriptor_72683128ee6e8843, []int{23}
-// }
-// func (m *MsgGovUpdateRegistryResponse) XXX_Unmarshal(b []byte) error {
-// 	return m.Unmarshal(b)
-// }
-// func (m *MsgGovUpdateRegistryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-// 	if deterministic {
-// 		return xxx_messageInfo_MsgGovUpdateRegistryResponse.Marshal(b, m, deterministic)
-// 	} else {
-// 		b = b[:cap(b)]
-// 		n, err := m.MarshalToSizedBuffer(b)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return b[:n], nil
-// 	}
-// }
-// func (m *MsgGovUpdateRegistryResponse) XXX_Merge(src proto.Message) {
-// 	xxx_messageInfo_MsgGovUpdateRegistryResponse.Merge(m, src)
-// }
-// func (m *MsgGovUpdateRegistryResponse) XXX_Size() int {
-// 	return m.Size()
-// }
-// func (m *MsgGovUpdateRegistryResponse) XXX_DiscardUnknown() {
-// 	xxx_messageInfo_MsgGovUpdateRegistryResponse.DiscardUnknown(m)
-// }
+func (m *MsgGovUpdateRegistryResponse) Reset()         { *m = MsgGovUpdateRegistryResponse{} }
+func (m *MsgGovUpdateRegistryResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgGovUpdateRegistryResponse) ProtoMessage()    {}
+func (*MsgGovUpdateRegistryResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_72683128ee6e8843, []int{23}
+}
+func (m *MsgGovUpdateRegistryResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovUpdateRegistryResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovUpdateRegistryResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovUpdateRegistryResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovUpdateRegistryResponse.Merge(m, src)
+}
+func (m *MsgGovUpdateRegistryResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovUpdateRegistryResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovUpdateRegistryResponse.DiscardUnknown(m)
+}
 
-// var xxx_messageInfo_MsgGovUpdateRegistryResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovUpdateRegistryResponse proto.InternalMessageInfo
 
-// func (*MsgGovUpdateRegistryResponse) XXX_MessageName() string {
-// 	return "umee.leverage.v1.MsgGovUpdateRegistryResponse"
-// }
+func (*MsgGovUpdateRegistryResponse) XXX_MessageName() string {
+	return "umee.leverage.v1.MsgGovUpdateRegistryResponse"
+}
 
-// // MsgGovUpdateSpecialAssets defines the Msg/GovUpdateSpecialAssets request type.
-// type MsgGovUpdateSpecialAssets struct {
-// 	// authority is the address of the governance account or the Emergency Group.
-// 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-// 	// description motivating the change. Should be used only when executing by the
-// 	// Emergency Group. Otherwise the x/gov Proposal metadata should be used.
-// 	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-// 	// sets are bidirectional groups of special asset pairs. Creating a special asset
-// 	// set causes all assets in the set to have a certain collateral weight when borrowing
-// 	// against each other (but not looping with themselves). Overrides any existing
-// 	// special asset pairs between assets in the set. Using both collateral weight
-// 	// and liquidation theshold of zero will clear all existing special pairs in the set instead.
-// 	Sets []SpecialAssetSet `protobuf:"bytes,3,rep,name=sets,proto3" json:"sets"`
-// 	// pairs are new or updated special asset pairs. Updating both a special asset pair's
-// 	// collateral weight and liquidation threshold to zero deletes the pair instead.
-// 	// These pairs will be applied after any sets above when passing a proposal,
-// 	// so they can be used to override certain set elements, set directional relationships,
-// 	// or set an asset's relation to itself (looping).
-// 	Pairs []SpecialAssetPair `protobuf:"bytes,4,rep,name=pairs,proto3" json:"pairs"`
-// }
+// MsgGovUpdateSpecialAssets defines the Msg/GovUpdateSpecialAssets request type.
+type MsgGovUpdateSpecialAssets struct {
+	// authority is the address of the governance account or the Emergency Group.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// description motivating the change. Should be used only when executing by the
+	// Emergency Group. Otherwise the x/gov Proposal metadata should be used.
+	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	// sets are bidirectional groups of special asset pairs. Creating a special asset
+	// set causes all assets in the set to have a certain collateral weight when borrowing
+	// against each other (but not looping with themselves). Overrides any existing
+	// special asset pairs between assets in the set. Using both collateral weight
+	// and liquidation theshold of zero will clear all existing special pairs in the set instead.
+	Sets []SpecialAssetSet `protobuf:"bytes,3,rep,name=sets,proto3" json:"sets"`
+	// pairs are new or updated special asset pairs. Updating both a special asset pair's
+	// collateral weight and liquidation threshold to zero deletes the pair instead.
+	// These pairs will be applied after any sets above when passing a proposal,
+	// so they can be used to override certain set elements, set directional relationships,
+	// or set an asset's relation to itself (looping).
+	Pairs []SpecialAssetPair `protobuf:"bytes,4,rep,name=pairs,proto3" json:"pairs"`
+}
 
-// func (m *MsgGovUpdateSpecialAssets) Reset()      { *m = MsgGovUpdateSpecialAssets{} }
-// func (*MsgGovUpdateSpecialAssets) ProtoMessage() {}
-// func (*MsgGovUpdateSpecialAssets) Descriptor() ([]byte, []int) {
-// 	return fileDescriptor_72683128ee6e8843, []int{24}
-// }
-// func (m *MsgGovUpdateSpecialAssets) XXX_Unmarshal(b []byte) error {
-// 	return m.Unmarshal(b)
-// }
-// func (m *MsgGovUpdateSpecialAssets) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-// 	if deterministic {
-// 		return xxx_messageInfo_MsgGovUpdateSpecialAssets.Marshal(b, m, deterministic)
-// 	} else {
-// 		b = b[:cap(b)]
-// 		n, err := m.MarshalToSizedBuffer(b)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return b[:n], nil
-// 	}
-// }
-// func (m *MsgGovUpdateSpecialAssets) XXX_Merge(src proto.Message) {
-// 	xxx_messageInfo_MsgGovUpdateSpecialAssets.Merge(m, src)
-// }
-// func (m *MsgGovUpdateSpecialAssets) XXX_Size() int {
-// 	return m.Size()
-// }
-// func (m *MsgGovUpdateSpecialAssets) XXX_DiscardUnknown() {
-// 	xxx_messageInfo_MsgGovUpdateSpecialAssets.DiscardUnknown(m)
-// }
+func (m *MsgGovUpdateSpecialAssets) Reset()      { *m = MsgGovUpdateSpecialAssets{} }
+func (m *MsgGovUpdateSpecialAssets) String() string { return proto.CompactTextString(m) }
+func (*MsgGovUpdateSpecialAssets) ProtoMessage() {}
+func (*MsgGovUpdateSpecialAssets) Descriptor() ([]byte, []int) {
+	return fileDescriptor_72683128ee6e8843, []int{24}
+}
+func (m *MsgGovUpdateSpecialAssets) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovUpdateSpecialAssets) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovUpdateSpecialAssets.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovUpdateSpecialAssets) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovUpdateSpecialAssets.Merge(m, src)
+}
+func (m *MsgGovUpdateSpecialAssets) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovUpdateSpecialAssets) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovUpdateSpecialAssets.DiscardUnknown(m)
+}
 
-// var xxx_messageInfo_MsgGovUpdateSpecialAssets proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovUpdateSpecialAssets proto.InternalMessageInfo
 
-// func (*MsgGovUpdateSpecialAssets) XXX_MessageName() string {
-// 	return "umee.leverage.v1.MsgGovUpdateSpecialAssets"
-// }
+func (*MsgGovUpdateSpecialAssets) XXX_MessageName() string {
+	return "umee.leverage.v1.MsgGovUpdateSpecialAssets"
+}
 
-// // MsgGovUpdateSpecialAssetsResponse defines the Msg/GovUpdateSpecialAssets response type.
-// type MsgGovUpdateSpecialAssetsResponse struct {
-// }
+// MsgGovUpdateSpecialAssetsResponse defines the Msg/GovUpdateSpecialAssets response type.
+type MsgGovUpdateSpecialAssetsResponse struct {
+}
 
-// func (m *MsgGovUpdateSpecialAssetsResponse) Reset()         { *m = MsgGovUpdateSpecialAssetsResponse{} }
-// func (m *MsgGovUpdateSpecialAssetsResponse) String() string { return proto.CompactTextString(m) }
-// func (*MsgGovUpdateSpecialAssetsResponse) ProtoMessage()    {}
-// func (*MsgGovUpdateSpecialAssetsResponse) Descriptor() ([]byte, []int) {
-// 	return fileDescriptor_72683128ee6e8843, []int{25}
-// }
-// func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Unmarshal(b []byte) error {
-// 	return m.Unmarshal(b)
-// }
-// func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-// 	if deterministic {
-// 		return xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse.Marshal(b, m, deterministic)
-// 	} else {
-// 		b = b[:cap(b)]
-// 		n, err := m.MarshalToSizedBuffer(b)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return b[:n], nil
-// 	}
-// }
-// func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Merge(src proto.Message) {
-// 	xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse.Merge(m, src)
-// }
-// func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Size() int {
-// 	return m.Size()
-// }
-// func (m *MsgGovUpdateSpecialAssetsResponse) XXX_DiscardUnknown() {
-// 	xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse.DiscardUnknown(m)
-// }
+func (m *MsgGovUpdateSpecialAssetsResponse) Reset()         { *m = MsgGovUpdateSpecialAssetsResponse{} }
+func (m *MsgGovUpdateSpecialAssetsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgGovUpdateSpecialAssetsResponse) ProtoMessage()    {}
+func (*MsgGovUpdateSpecialAssetsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_72683128ee6e8843, []int{25}
+}
+func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse.Merge(m, src)
+}
+func (m *MsgGovUpdateSpecialAssetsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovUpdateSpecialAssetsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse.DiscardUnknown(m)
+}
 
-// var xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovUpdateSpecialAssetsResponse proto.InternalMessageInfo
 
-// func (*MsgGovUpdateSpecialAssetsResponse) XXX_MessageName() string {
-// 	return "umee.leverage.v1.MsgGovUpdateSpecialAssetsResponse"
-// }
+func (*MsgGovUpdateSpecialAssetsResponse) XXX_MessageName() string {
+	return "umee.leverage.v1.MsgGovUpdateSpecialAssetsResponse"
+}
 
-// // MsgGovSetParams is used by governance to update module parameters.
-// type MsgGovSetParams struct {
-// 	// authority must be the address of the governance account.
-// 	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-// 	Params    Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
-// }
+// MsgGovSetParams is used by governance to update module parameters.
+type MsgGovSetParams struct {
+	// authority must be the address of the governance account.
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	Params    Params `protobuf:"bytes,2,opt,name=params,proto3" json:"params"`
+}
 
-// func (m *MsgGovSetParams) Reset()      { *m = MsgGovSetParams{} }
-// func (*MsgGovSetParams) ProtoMessage() {}
-// func (*MsgGovSetParams) Descriptor() ([]byte, []int) {
-// 	return fileDescriptor_72683128ee6e8843, []int{26}
-// }
-// func (m *MsgGovSetParams) XXX_Unmarshal(b []byte) error {
-// 	return m.Unmarshal(b)
-// }
-// func (m *MsgGovSetParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-// 	if deterministic {
-// 		return xxx_messageInfo_MsgGovSetParams.Marshal(b, m, deterministic)
-// 	} else {
-// 		b = b[:cap(b)]
-// 		n, err := m.MarshalToSizedBuffer(b)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return b[:n], nil
-// 	}
-// }
-// func (m *MsgGovSetParams) XXX_Merge(src proto.Message) {
-// 	xxx_messageInfo_MsgGovSetParams.Merge(m, src)
-// }
-// func (m *MsgGovSetParams) XXX_Size() int {
-// 	return m.Size()
-// }
-// func (m *MsgGovSetParams) XXX_DiscardUnknown() {
-// 	xxx_messageInfo_MsgGovSetParams.DiscardUnknown(m)
-// }
+func (m *MsgGovSetParams) Reset()      { *m = MsgGovSetParams{} }
+func (m *MsgGovSetParams) String() string { return proto.CompactTextString(m) }
+func (*MsgGovSetParams) ProtoMessage() {}
+func (*MsgGovSetParams) Descriptor() ([]byte, []int) {
+	return fileDescriptor_72683128ee6e8843, []int{26}
+}
+func (m *MsgGovSetParams) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovSetParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovSetParams.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovSetParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovSetParams.Merge(m, src)
+}
+func (m *MsgGovSetParams) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovSetParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovSetParams.DiscardUnknown(m)
+}
 
-// var xxx_messageInfo_MsgGovSetParams proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovSetParams proto.InternalMessageInfo
 
-// func (*MsgGovSetParams) XXX_MessageName() string {
-// 	return "umee.leverage.v1.MsgGovSetParams"
-// }
+func (*MsgGovSetParams) XXX_MessageName() string {
+	return "umee.leverage.v1.MsgGovSetParams"
+}
 
-// // MsgGovSetParamsResponse defines the Msg/SetParams response type.
-// type MsgGovSetParamsResponse struct {
-// }
+// MsgGovSetParamsResponse defines the Msg/SetParams response type.
+type MsgGovSetParamsResponse struct {
+}
 
-// func (m *MsgGovSetParamsResponse) Reset()         { *m = MsgGovSetParamsResponse{} }
-// func (m *MsgGovSetParamsResponse) String() string { return proto.CompactTextString(m) }
-// func (*MsgGovSetParamsResponse) ProtoMessage()    {}
-// func (*MsgGovSetParamsResponse) Descriptor() ([]byte, []int) {
-// 	return fileDescriptor_72683128ee6e8843, []int{27}
-// }
-// func (m *MsgGovSetParamsResponse) XXX_Unmarshal(b []byte) error {
-// 	return m.Unmarshal(b)
-// }
-// func (m *MsgGovSetParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-// 	if deterministic {
-// 		return xxx_messageInfo_MsgGovSetParamsResponse.Marshal(b, m, deterministic)
-// 	} else {
-// 		b = b[:cap(b)]
-// 		n, err := m.MarshalToSizedBuffer(b)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return b[:n], nil
-// 	}
-// }
-// func (m *MsgGovSetParamsResponse) XXX_Merge(src proto.Message) {
-// 	xxx_messageInfo_MsgGovSetParamsResponse.Merge(m, src)
-// }
-// func (m *MsgGovSetParamsResponse) XXX_Size() int {
-// 	return m.Size()
-// }
-// func (m *MsgGovSetParamsResponse) XXX_DiscardUnknown() {
-// 	xxx_messageInfo_MsgGovSetParamsResponse.DiscardUnknown(m)
-// }
+func (m *MsgGovSetParamsResponse) Reset()         { *m = MsgGovSetParamsResponse{} }
+func (m *MsgGovSetParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgGovSetParamsResponse) ProtoMessage()    {}
+func (*MsgGovSetParamsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_72683128ee6e8843, []int{27}
+}
+func (m *MsgGovSetParamsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgGovSetParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgGovSetParamsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgGovSetParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovSetParamsResponse.Merge(m, src)
+}
+func (m *MsgGovSetParamsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgGovSetParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovSetParamsResponse.DiscardUnknown(m)
+}
 
-// var xxx_messageInfo_MsgGovSetParamsResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovSetParamsResponse proto.InternalMessageInfo
 
-// func (*MsgGovSetParamsResponse) XXX_MessageName() string {
-// 	return "umee.leverage.v1.MsgGovSetParamsResponse"
-// }
+func (*MsgGovSetParamsResponse) XXX_MessageName() string {
+	return "umee.leverage.v1.MsgGovSetParamsResponse"
+}
 func init() {
 	proto.RegisterType((*MsgSupply)(nil), "umee.leverage.v1.MsgSupply")
 	proto.RegisterType((*MsgWithdraw)(nil), "umee.leverage.v1.MsgWithdraw")
@@ -1322,9 +1326,12 @@ func init() {
 	proto.RegisterType((*MsgLiquidateResponse)(nil), "umee.leverage.v1.MsgLiquidateResponse")
 	proto.RegisterType((*MsgLeveragedLiquidateResponse)(nil), "umee.leverage.v1.MsgLeveragedLiquidateResponse")
 	proto.RegisterType((*MsgSupplyCollateralResponse)(nil), "umee.leverage.v1.MsgSupplyCollateralResponse")
-	// proto.RegisterType((*MsgGovUpdateRegistryResponse)(nil), "umee.leverage.v1.MsgGovUpdateRegistryResponse")
-	// proto.RegisterType((*MsgGovUpdateSpecialAssetsResponse)(nil), "umee.leverage.v1.MsgGovUpdateSpecialAssetsResponse")
-	// proto.RegisterType((*MsgGovSetParamsResponse)(nil), "umee.leverage.v1.MsgGovSetParamsResponse")
+	proto.RegisterType((*MsgGovUpdateRegistry)(nil), "umee.leverage.v1.MsgGovUpdateRegistry")
+	proto.RegisterType((*MsgGovUpdateRegistryResponse)(nil), "umee.leverage.v1.MsgGovUpdateRegistryResponse")
+	proto.RegisterType((*MsgGovUpdateSpecialAssets)(nil), "umee.leverage.v1.MsgGovUpdateSpecialAssets")
+	proto.RegisterType((*MsgGovUpdateSpecialAssetsResponse)(nil), "umee.leverage.v1.MsgGovUpdateSpecialAssetsResponse")
+	proto.RegisterType((*MsgGovSetParams)(nil), "umee.leverage.v1.MsgGovSetParams")
+	proto.RegisterType((*MsgGovSetParamsResponse)(nil), "umee.leverage.v1.MsgGovSetParamsResponse")
 }
 
 func init() { proto.RegisterFile("umee/leverage/v1/tx.proto", fileDescriptor_72683128ee6e8843) }
@@ -1410,6 +1417,120 @@ var fileDescriptor_72683128ee6e8843 = []byte{
 	0x00, 0x00, 0xff, 0xff, 0x84, 0xae, 0x8c, 0x87, 0x66, 0x12, 0x00, 0x00,
 }
 
+func (this *MsgGovUpdateRegistry) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MsgGovUpdateRegistry)
+	if !ok {
+		that2, ok := that.(MsgGovUpdateRegistry)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Authority != that1.Authority {
+		return false
+	}
+	if this.Description != that1.Description {
+		return false
+	}
+	if len(this.AddTokens) != len(that1.AddTokens) {
+		return false
+	}
+	for i := range this.AddTokens {
+		if !this.AddTokens[i].Equal(&that1.AddTokens[i]) {
+			return false
+		}
+	}
+	if len(this.UpdateTokens) != len(that1.UpdateTokens) {
+		return false
+	}
+	for i := range this.UpdateTokens {
+		if !this.UpdateTokens[i].Equal(&that1.UpdateTokens[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *MsgGovUpdateSpecialAssets) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MsgGovUpdateSpecialAssets)
+	if !ok {
+		that2, ok := that.(MsgGovUpdateSpecialAssets)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Authority != that1.Authority {
+		return false
+	}
+	if this.Description != that1.Description {
+		return false
+	}
+	if len(this.Sets) != len(that1.Sets) {
+		return false
+	}
+	for i := range this.Sets {
+		if !this.Sets[i].Equal(&that1.Sets[i]) {
+			return false
+		}
+	}
+	if len(this.Pairs) != len(that1.Pairs) {
+		return false
+	}
+	for i := range this.Pairs {
+		if !this.Pairs[i].Equal(&that1.Pairs[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *MsgGovSetParams) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*MsgGovSetParams)
+	if !ok {
+		that2, ok := that.(MsgGovSetParams)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Authority != that1.Authority {
+		return false
+	}
+	if !this.Params.Equal(&that1.Params) {
+		return false
+	}
+	return true
+}
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ grpc.ClientConn
@@ -1464,6 +1585,13 @@ type MsgClient interface {
 	SupplyCollateral(ctx context.Context, in *MsgSupplyCollateral, opts ...grpc.CallOption) (*MsgSupplyCollateralResponse, error)
 	// GovUpdateRegistry adds new tokens to the token registry or
 	// updates existing tokens with new settings.
+	GovUpdateRegistry(ctx context.Context, in *MsgGovUpdateRegistry, opts ...grpc.CallOption) (*MsgGovUpdateRegistryResponse, error)
+	// GovUpdateSpecialAssets adds, updates, or removes special asset pairs. Note that a special asset
+	// pair can be removed by setting its special collateral weight to negative one. Also allows for the creation
+	// of sets of assets, where each asset in the set forms a special asset pair with all of the others.
+	GovUpdateSpecialAssets(ctx context.Context, in *MsgGovUpdateSpecialAssets, opts ...grpc.CallOption) (*MsgGovUpdateSpecialAssetsResponse, error)
+	// GovSetParams is used by governance proposals to update parameters.
+	GovSetParams(ctx context.Context, in *MsgGovSetParams, opts ...grpc.CallOption) (*MsgGovSetParamsResponse, error)
 }
 
 type msgClient struct {
@@ -1573,6 +1701,33 @@ func (c *msgClient) SupplyCollateral(ctx context.Context, in *MsgSupplyCollatera
 	return out, nil
 }
 
+func (c *msgClient) GovUpdateRegistry(ctx context.Context, in *MsgGovUpdateRegistry, opts ...grpc.CallOption) (*MsgGovUpdateRegistryResponse, error) {
+	out := new(MsgGovUpdateRegistryResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/GovUpdateRegistry", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) GovUpdateSpecialAssets(ctx context.Context, in *MsgGovUpdateSpecialAssets, opts ...grpc.CallOption) (*MsgGovUpdateSpecialAssetsResponse, error) {
+	out := new(MsgGovUpdateSpecialAssetsResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/GovUpdateSpecialAssets", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) GovSetParams(ctx context.Context, in *MsgGovSetParams, opts ...grpc.CallOption) (*MsgGovSetParamsResponse, error) {
+	out := new(MsgGovSetParamsResponse)
+	err := c.cc.Invoke(ctx, "/umee.leverage.v1.Msg/GovSetParams", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
 	// Supply moves tokens from user balance to the module for lending or collateral.
@@ -1617,6 +1772,13 @@ type MsgServer interface {
 	SupplyCollateral(context.Context, *MsgSupplyCollateral) (*MsgSupplyCollateralResponse, error)
 	// GovUpdateRegistry adds new tokens to the token registry or
 	// updates existing tokens with new settings.
+	GovUpdateRegistry(context.Context, *MsgGovUpdateRegistry) (*MsgGovUpdateRegistryResponse, error)
+	// GovUpdateSpecialAssets adds, updates, or removes special asset pairs. Note that a special asset
+	// pair can be removed by setting its special collateral weight to negative one. Also allows for the creation
+	// of sets of assets, where each asset in the set forms a special asset pair with all of the others.
+	GovUpdateSpecialAssets(context.Context, *MsgGovUpdateSpecialAssets) (*MsgGovUpdateSpecialAssetsResponse, error)
+	// GovSetParams is used by governance proposals to update parameters.
+	GovSetParams(context.Context, *MsgGovSetParams) (*MsgGovSetParamsResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -1655,6 +1817,15 @@ func (*UnimplementedMsgServer) LeveragedLiquidate(ctx context.Context, req *MsgL
 }
 func (*UnimplementedMsgServer) SupplyCollateral(ctx context.Context, req *MsgSupplyCollateral) (*MsgSupplyCollateralResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SupplyCollateral not implemented")
+}
+func (*UnimplementedMsgServer) GovUpdateRegistry(ctx context.Context, req *MsgGovUpdateRegistry) (*MsgGovUpdateRegistryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovUpdateRegistry not implemented")
+}
+func (*UnimplementedMsgServer) GovUpdateSpecialAssets(ctx context.Context, req *MsgGovUpdateSpecialAssets) (*MsgGovUpdateSpecialAssetsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovUpdateSpecialAssets not implemented")
+}
+func (*UnimplementedMsgServer) GovSetParams(ctx context.Context, req *MsgGovSetParams) (*MsgGovSetParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovSetParams not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -1859,6 +2030,60 @@ func _Msg_SupplyCollateral_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_GovUpdateRegistry_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovUpdateRegistry)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GovUpdateRegistry(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Msg/GovUpdateRegistry",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GovUpdateRegistry(ctx, req.(*MsgGovUpdateRegistry))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_GovUpdateSpecialAssets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovUpdateSpecialAssets)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GovUpdateSpecialAssets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Msg/GovUpdateSpecialAssets",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GovUpdateSpecialAssets(ctx, req.(*MsgGovUpdateSpecialAssets))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_GovSetParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovSetParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).GovSetParams(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.leverage.v1.Msg/GovSetParams",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).GovSetParams(ctx, req.(*MsgGovSetParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Msg_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "umee.leverage.v1.Msg",
 	HandlerType: (*MsgServer)(nil),
@@ -1906,6 +2131,18 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SupplyCollateral",
 			Handler:    _Msg_SupplyCollateral_Handler,
+		},
+		{
+			MethodName: "GovUpdateRegistry",
+			Handler:    _Msg_GovUpdateRegistry_Handler,
+		},
+		{
+			MethodName: "GovUpdateSpecialAssets",
+			Handler:    _Msg_GovUpdateSpecialAssets_Handler,
+		},
+		{
+			MethodName: "GovSetParams",
+			Handler:    _Msg_GovSetParams_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -2754,6 +2991,245 @@ func (m *MsgSupplyCollateralResponse) MarshalToSizedBuffer(dAtA []byte) (int, er
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgGovUpdateRegistry) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovUpdateRegistry) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovUpdateRegistry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.UpdateTokens) > 0 {
+		for iNdEx := len(m.UpdateTokens) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.UpdateTokens[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if len(m.AddTokens) > 0 {
+		for iNdEx := len(m.AddTokens) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.AddTokens[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovUpdateRegistryResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovUpdateRegistryResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovUpdateRegistryResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovUpdateSpecialAssets) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovUpdateSpecialAssets) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovUpdateSpecialAssets) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Pairs) > 0 {
+		for iNdEx := len(m.Pairs) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Pairs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
+		}
+	}
+	if len(m.Sets) > 0 {
+		for iNdEx := len(m.Sets) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Sets[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.Description) > 0 {
+		i -= len(m.Description)
+		copy(dAtA[i:], m.Description)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Description)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovUpdateSpecialAssetsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovUpdateSpecialAssetsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovUpdateSpecialAssetsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovSetParams) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovSetParams) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovSetParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	if len(m.Authority) > 0 {
+		i -= len(m.Authority)
+		copy(dAtA[i:], m.Authority)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Authority)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgGovSetParamsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgGovSetParamsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgGovSetParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -3074,6 +3550,106 @@ func (m *MsgSupplyCollateralResponse) Size() (n int) {
 	_ = l
 	l = m.Collateralized.Size()
 	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
+func (m *MsgGovUpdateRegistry) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if len(m.AddTokens) > 0 {
+		for _, e := range m.AddTokens {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	if len(m.UpdateTokens) > 0 {
+		for _, e := range m.UpdateTokens {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MsgGovUpdateRegistryResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgGovUpdateSpecialAssets) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = len(m.Description)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if len(m.Sets) > 0 {
+		for _, e := range m.Sets {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	if len(m.Pairs) > 0 {
+		for _, e := range m.Pairs {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *MsgGovUpdateSpecialAssetsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgGovSetParams) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Authority)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = m.Params.Size()
+	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
+func (m *MsgGovSetParamsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	return n
 }
 
@@ -5453,7 +6029,635 @@ func (m *MsgSupplyCollateralResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *MsgGovUpdateRegistry) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovUpdateRegistry: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovUpdateRegistry: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AddTokens", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AddTokens = append(m.AddTokens, Token{})
+			if err := m.AddTokens[len(m.AddTokens)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UpdateTokens", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UpdateTokens = append(m.UpdateTokens, Token{})
+			if err := m.UpdateTokens[len(m.UpdateTokens)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
 
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovUpdateRegistryResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovUpdateRegistryResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovUpdateRegistryResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovUpdateSpecialAssets) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovUpdateSpecialAssets: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovUpdateSpecialAssets: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Description", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Description = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sets", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sets = append(m.Sets, SpecialAssetSet{})
+			if err := m.Sets[len(m.Sets)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Pairs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Pairs = append(m.Pairs, SpecialAssetPair{})
+			if err := m.Pairs[len(m.Pairs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovUpdateSpecialAssetsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovUpdateSpecialAssetsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovUpdateSpecialAssetsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovSetParams) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovSetParams: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovSetParams: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Authority", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Authority = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Params", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgGovSetParamsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgGovSetParamsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgGovSetParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func skipTx(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
