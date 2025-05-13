@@ -64,11 +64,15 @@ gas                 = "auto"
 gas_adjustment      = 1.3
 gas_denom           = "uosmo"
 gas_prices          = "0.025uosmo"
-grpc_server_address = "osmosis-grpc.polkachu.com:12590"
 prefix              = "osmo"
-rpc_server_address  = "https://rpc-osmosis.margined.io:443"
-# Fees to be sent with the transaction
 # fees = "10000uosmo"
+
+[[chain.grpc_endpoints]]
+grpc_server_address = "osmosis-grpc.polkachu.com:12590"
+grpc_tls = false
+
+[[chain.rpc_endpoints]]
+rpc_server_address = "https://rpc-osmosis.margined.io:443"
 
 [key]
 app_name = "osmosis"
