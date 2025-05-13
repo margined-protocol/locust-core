@@ -192,27 +192,45 @@ func BroadcastShortTermOrder(ctx context.Context, l *zap.Logger, cosmosClient *c
 	}
 }
 
-// InitRPCClient initialises a RPC client.
+// InitRPCClient initialises a RPC client with websocket support.
+// It returns an error if websocket connection fails.
 func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string) (*rpchttp.HTTP, cometbft.CometRPC, error) {
-	logger.Debug("Initializing RPC client", zap.String("serverAddress", serverAddress), zap.String("websocketPath", websocketPath))
+	logger.Debug("Initializing RPC client",
+		zap.String("serverAddress", serverAddress),
+		zap.String("websocketPath", websocketPath))
+
 	client, err := rpchttp.New(serverAddress, websocketPath)
 	if err != nil {
-		logger.Fatal("Error subscribing to websocket client", zap.Error(err))
+		return nil, nil, fmt.Errorf("error creating RPC client: %w", err)
 	}
 
 	logger.Debug("Starting Websocket Client")
 	err = client.Start()
 	if err != nil {
-		logger.Fatal("Error starting websocket client", zap.Error(err))
+		// Clean up the client to avoid resource leaks
+		_ = client.Stop()
+
+		return nil, nil, fmt.Errorf("failed to start websocket connection: %w", err)
 	}
+
+	logger.Info("Successfully connected to RPC server with websockets",
+		zap.String("serverAddress", serverAddress))
 
 	return client, client, nil
 }
 
 // InitCosmosClient initializes a Cosmos client with retry logic
 func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, key *types.SigningKey) (*cosmosclient.Client, error) {
+	// Ensure we have at least one RPC endpoint
+	if len(chain.RPCEndpoints) == 0 {
+		return nil, fmt.Errorf("no RPC endpoints configured for chain %s", chain.ChainID)
+	}
+
+	// Use the first RPC endpoint address
+	rpcServerAddress := chain.RPCEndpoints[0].Address
+
 	opts := []cosmosclient.Option{
-		cosmosclient.WithNodeAddress(chain.RPCServerAddress),
+		cosmosclient.WithNodeAddress(rpcServerAddress),
 		cosmosclient.WithAddressPrefix(chain.Prefix),
 		cosmosclient.WithKeyringBackend(cosmosaccount.KeyringBackend(key.Backend)),
 		cosmosclient.WithKeyringDir(key.RootDir),
@@ -244,8 +262,16 @@ func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, ke
 
 // InitFeeClient initialises a cosmosclient for executing transactions.
 func InitFeeClient(ctx context.Context, l *zap.Logger, chain *types.Chain, key *types.SigningKey) (*cosmosclient.Client, error) {
+	// Ensure we have at least one RPC endpoint
+	if len(chain.RPCEndpoints) == 0 {
+		return nil, fmt.Errorf("no RPC endpoints configured for chain %s", chain.ChainID)
+	}
+
+	// Use the first RPC endpoint address
+	rpcServerAddress := chain.RPCEndpoints[0].Address
+
 	opts := []cosmosclient.Option{
-		cosmosclient.WithNodeAddress(chain.RPCServerAddress),
+		cosmosclient.WithNodeAddress(rpcServerAddress),
 		cosmosclient.WithAddressPrefix(chain.Prefix),
 		cosmosclient.WithKeyringBackend(cosmosaccount.KeyringBackend(key.Backend)),
 		cosmosclient.WithKeyringDir(key.RootDir),

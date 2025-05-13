@@ -47,6 +47,15 @@ type BinanceConfig struct {
 	Token1    string `toml:"token1" mapstructure:"token1"` // Token1 is the quote token in the pair
 }
 
+type PryzmConfig struct {
+	BaseURL         string `toml:"base_url" mapstructure:"base_url"`
+	PoolID          string `toml:"pool_id" mapstructure:"pool_id"`
+	StakingDenom    string `toml:"staking_denom" mapstructure:"staking_denom"`
+	LPDenom         string `toml:"lp_denom" mapstructure:"lp_denom"`
+	BaseDenom       string `toml:"base_denom" mapstructure:"base_denom"`
+	FlatDiscountBPS int64  `toml:"flat_discount_bps" mapstructure:"flat_discount_bps"`
+}
+
 type SlinkyConfig struct {
 	Base  string `toml:"base" mapstructure:"base"`   // base token in the pair
 	Quote string `toml:"quote" mapstructure:"quote"` // quote token in the pair
@@ -55,13 +64,6 @@ type SlinkyConfig struct {
 type Drop struct {
 	Chain Chain      `toml:"chain" mapstructure:"chain"`
 	Info  UnbondDrop `toml:"info" mapstructure:"info"`
-}
-
-type UnbondDrop struct {
-	Denom                            string `toml:"denom" mapstructure:"denom"`
-	CoreContractAddress              string `json:"core_contract_address" mapstructure:"core_contract_address"`
-	WithdrawalVoucherContractAddress string `json:"withdrawal_voucher_contract_address" mapstructure:"withdrawal_voucher_contract_address"`
-	WithdrawalManagerContractAddress string `json:"withdrawal_manager_contract_address" mapstructure:"withdrawal_manager_contract_address"`
 }
 
 type Zone struct {
@@ -156,6 +158,7 @@ type HedgeConfig struct {
 	TokenOutDecimals  int     `json:"token_out_decimals" mapstructure:"token_out_decimals"`   // decimals of token_out
 	MarginThreshold   int64   `json:"margin_threshold" mapstructure:"margin_threshold"`       // BPS proximity to liquidation price we accept prior to adding more margin
 	Expiration        string  `json:"expiration" mapstructure:"expiration"`                   // expiration of hedge as date `YYYY-MM-DD HH:MM:SS`
+	Receiver          string  `json:"receiver" mapstructure:"receiver"`                       // receiver of funds
 }
 
 type MarsConfig struct {

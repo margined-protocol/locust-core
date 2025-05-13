@@ -64,11 +64,15 @@ gas                 = "auto"
 gas_adjustment      = 1.3
 gas_denom           = "uosmo"
 gas_prices          = "0.025uosmo"
-grpc_server_address = "osmosis-grpc.polkachu.com:12590"
 prefix              = "osmo"
-rpc_server_address  = "https://rpc-osmosis.margined.io:443"
-# Fees to be sent with the transaction
 # fees = "10000uosmo"
+
+[[chain.grpc_endpoints]]
+grpc_server_address = "osmosis-grpc.polkachu.com:12590"
+grpc_tls = false
+
+[[chain.rpc_endpoints]]
+rpc_server_address = "https://rpc-osmosis.margined.io:443"
 
 [key]
 app_name = "osmosis"
@@ -151,9 +155,9 @@ rpc_server_address  = "https://dydx-rpc.polkachu.com:443"
 	// Validate the top-level config fields
 	require.Equal(t, "osmo", cfg.Chain.Prefix)
 	require.Equal(t, "uosmo", cfg.Chain.GasDenom)
-	require.Equal(t, "osmosis-grpc.polkachu.com:12590", cfg.Chain.GRPCServerAddress)
-	require.Equal(t, "https://rpc-osmosis.margined.io:443", cfg.Chain.RPCServerAddress)
-	require.False(t, cfg.Chain.GRPCTLS)
+	require.Equal(t, "osmosis-grpc.polkachu.com:12590", cfg.Chain.GRPCEndpoints[0].Address)
+	require.Equal(t, "https://rpc-osmosis.margined.io:443", cfg.Chain.RPCEndpoints[0].Address)
+	require.False(t, cfg.Chain.GRPCEndpoints[0].UseTLS)
 	require.Equal(t, "locust", cfg.Memo)
 	require.Equal(t, "/websocket", cfg.WebsocketPath)
 	require.Equal(t, "margined-redemption", cfg.SignerAccount)
