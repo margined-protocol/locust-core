@@ -8,8 +8,9 @@ import (
 
 	"go.uber.org/zap"
 
-	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	cometbft "github.com/cosmos/cosmos-sdk/client"
+
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 )
 
 const (

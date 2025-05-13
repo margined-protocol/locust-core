@@ -6,6 +6,7 @@ import (
 	"context"
 	"flag"
 	"testing"
+	"time"
 
 	"github.com/margined-protocol/locust-core/pkg/yieldmarket"
 	"github.com/test-go/testify/assert"
@@ -30,7 +31,13 @@ func TestRefreshMarketData(t *testing.T) {
 	logger, _ := zap.NewProduction()
 
 	// Call the standalone function
-	marketData, err := yieldmarket.RefreshMarketData(context.Background(), conn, "ibc/92BC8E5C50E6664B4DA748B62C1FFBE321967E1F8868EE03B005977F9AA7C0B8", logger)
+	marketData, err := yieldmarket.RefreshMarketData(
+		context.Background(),
+		conn,
+		time.Now(),
+		"ibc/92BC8E5C50E6664B4DA748B62C1FFBE321967E1F8868EE03B005977F9AA7C0B8",
+		logger,
+	)
 	if err != nil {
 		t.Fatalf("failed to refresh market data: %v", err)
 	}

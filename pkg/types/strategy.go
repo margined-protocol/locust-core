@@ -47,6 +47,15 @@ type BinanceConfig struct {
 	Token1    string `toml:"token1" mapstructure:"token1"` // Token1 is the quote token in the pair
 }
 
+type PryzmConfig struct {
+	BaseURL         string `toml:"base_url" mapstructure:"base_url"`
+	PoolID          string `toml:"pool_id" mapstructure:"pool_id"`
+	StakingDenom    string `toml:"staking_denom" mapstructure:"staking_denom"`
+	LPDenom         string `toml:"lp_denom" mapstructure:"lp_denom"`
+	BaseDenom       string `toml:"base_denom" mapstructure:"base_denom"`
+	FlatDiscountBPS int64  `toml:"flat_discount_bps" mapstructure:"flat_discount_bps"`
+}
+
 type SlinkyConfig struct {
 	Base  string `toml:"base" mapstructure:"base"`   // base token in the pair
 	Quote string `toml:"quote" mapstructure:"quote"` // quote token in the pair
@@ -55,14 +64,6 @@ type SlinkyConfig struct {
 type Drop struct {
 	Chain Chain      `toml:"chain" mapstructure:"chain"`
 	Info  UnbondDrop `toml:"info" mapstructure:"info"`
-}
-
-type PryzmConfig struct {
-	BaseURL      string `toml:"base_url" mapstructure:"base_url"`
-	PoolID       string `toml:"pool_id" mapstructure:"pool_id"`
-	StakingDenom string `toml:"staking_denom" mapstructure:"staking_denom"`
-	LPDenom      string `toml:"lp_denom" mapstructure:"lp_denom"`
-	BaseDenom    string `toml:"base_denom" mapstructure:"base_denom"`
 }
 
 type Zone struct {

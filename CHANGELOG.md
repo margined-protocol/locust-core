@@ -1,5 +1,16 @@
 
-## [0.0.2](https://github.com/margined-protocol/locust-core/compare/v0.0.1..v0.0.2) - 2025-04-03
+## [0.0.6](https://github.com/margined-protocol/locust-core/compare/v0.0.5..v0.0.6) - 2025-05-06
+
+### ⛰️  Features
+
+- *(levana)* Add evaluator ([#8](https://github.com/margined-protocol/locust-core/issues/8)) - ([0a5b30d](https://github.com/margined-protocol/locust-core/commit/0a5b30d5cff476f46f0cef8b3ea88bf90e605c1f))
+- Removed the osmosis local strategy types ([#15](https://github.com/margined-protocol/locust-core/issues/15)) - ([1c41d20](https://github.com/margined-protocol/locust-core/commit/1c41d2083e2a0af7c74a071661ecd45c39d4165e))
+
+## New Contributors ❤️
+
+* @maxrobot made their first contribution in [#15](https://github.com/margined-protocol/locust-core/pull/15)
+
+## [0.0.5](https://github.com/margined-protocol/locust-core/compare/v0.0.1..v0.0.5) - 2025-04-03
 
 ### 🐛 Bug Fixes
 

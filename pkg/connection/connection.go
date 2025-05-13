@@ -219,23 +219,6 @@ func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string) (*rp
 	return client, client, nil
 }
 
-// // InitRPCClient initialises a RPC client.
-// func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string) (*rpchttp.HTTP, cometbft.CometRPC, error) {
-// 	logger.Debug("Initializing RPC client", zap.String("serverAddress", serverAddress), zap.String("websocketPath", websocketPath))
-// 	client, err := rpchttp.New(serverAddress, websocketPath)
-// 	if err != nil {
-// 		logger.Fatal("Error subscribing to websocket client", zap.Error(err))
-// 	}
-
-// 	logger.Debug("Starting Websocket Client")
-// 	err = client.Start()
-// 	if err != nil {
-// 		logger.Fatal("Error starting websocket client", zap.Error(err))
-// 	}
-
-// 	return client, client, nil
-// }
-
 // InitCosmosClient initializes a Cosmos client with retry logic
 func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, key *types.SigningKey) (*cosmosclient.Client, error) {
 	// Ensure we have at least one RPC endpoint

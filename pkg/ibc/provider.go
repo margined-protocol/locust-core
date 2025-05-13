@@ -12,8 +12,9 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 
-	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 )
 
 // DefaultTransferProvider implements the TransferProvider interface
@@ -145,7 +146,11 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 			return fmt.Errorf("failed to create websocket client: %w", err)
 		}
 	}
-	defer wsClient.Stop()
+	defer func() {
+		if err := wsClient.Stop(); err != nil {
+			p.logger.Error("Failed to stop websocket client", zap.Error(err))
+		}
+	}()
 
 	// Subscribe to receive_packet events
 	query := fmt.Sprintf("transfer.recipient = '%s'", request.Receiver)

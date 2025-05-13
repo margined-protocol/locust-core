@@ -8,7 +8,6 @@ import (
 	conn "github.com/margined-protocol/locust-core/pkg/connection"
 	"github.com/margined-protocol/locust-core/pkg/ibc"
 	"github.com/margined-protocol/locust-core/pkg/math"
-
 	// Import Umee leverage module types - you'll need to add these to your go.mod
 	ltypes "github.com/margined-protocol/locust-core/pkg/proto/umee/leverage/types"
 	"go.uber.org/zap"
@@ -90,9 +89,11 @@ func (u *UmeeYieldMarket) GetDenom() string {
 }
 
 // Standalone function to refresh market data
-func RefreshMarketData(ctx context.Context, connection *grpc.ClientConn, denom string, logger *zap.Logger) (*ltypes.QueryMarketSummaryResponse, error) {
+func RefreshMarketData(
+	ctx context.Context, connection *grpc.ClientConn, lastUpdated time.Time, denom string, logger *zap.Logger,
+) (*ltypes.QueryMarketSummaryResponse, error) {
 	var cachedMarket *ltypes.QueryMarketSummaryResponse
-	var lastUpdated time.Time
+	// var lastUpdated time.Time
 
 	err := retry(DefaultRetryAmount, 1*time.Second, *logger, func() error {
 		// If data is less than 60 seconds old, don't refresh
@@ -121,7 +122,7 @@ func RefreshMarketData(ctx context.Context, connection *grpc.ClientConn, denom s
 
 // Update the UmeeYieldMarket method to use the standalone function
 func (u *UmeeYieldMarket) refreshMarketData(ctx context.Context) error {
-	marketData, err := RefreshMarketData(ctx, u.Connection, u.Denom, u.logger)
+	marketData, err := RefreshMarketData(ctx, u.Connection, u.lastUpdated, u.Denom, u.logger)
 	if err != nil {
 		return err
 	}
