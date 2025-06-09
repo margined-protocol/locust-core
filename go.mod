@@ -28,7 +28,7 @@ require (
 	github.com/test-go/testify v1.1.4
 	golang.org/x/net v0.39.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250324211829-b45e905df463
-	google.golang.org/grpc v1.72.0
+	google.golang.org/grpc v1.73.0
 )
 
 require (
