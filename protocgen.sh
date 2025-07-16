@@ -30,6 +30,7 @@ cd ..
 mkdir -p ./pkg/proto
 # cp -r github.com/Stride-Labs/stride/v26/x/* ./pkg/proto/
 # cp -r github.com/neutron-org/neutron/v5/x/* ./pkg/proto/
-cp -r github.com/umee-network/umee/v6/x/* ./pkg/proto/
+cp -r github.com/umee-network/umee/v6/x/* ./pkg/proto/umee/
 # cp -r github.com/dydxprotocol/v4-chain/protocol/x/* ./pkg/proto/
+
 rm -rf github.com

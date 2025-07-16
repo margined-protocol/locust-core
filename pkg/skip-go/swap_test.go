@@ -1,6 +1,7 @@
 package skipgo
 
 import (
+	"context"
 	"flag"
 	"math/big"
 	"testing"
@@ -59,7 +60,7 @@ func TestPriceCurveAnalysis(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Test the findOptimalSwapAmount function
 			optimalAmount, route, err := skip.FindOptimalSwapRoute(
-				t.Context(),
+				context.Background(),
 				logger,
 				"neutron-1",
 				tc.tokenIn,

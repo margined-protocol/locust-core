@@ -13,6 +13,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 )
 
 // DefaultTransferProvider implements the TransferProvider interface
@@ -29,15 +31,6 @@ type DefaultTransferProvider struct {
 	msgHandler     MessageHandler
 	listeners      map[string]context.CancelFunc // Websocket listeners
 }
-
-// type transferData struct {
-// 	request       TransferRequest
-// 	result        TransferResult
-// 	sourceClient  *cosmosclient.Client
-// 	destClient    *cosmosclient.Client
-// 	sourceBalance sdk.Coin
-// 	destBalance   sdk.Coin
-// }
 
 // NewTransferProvider creates a new IBC transfer provider
 func NewTransferProvider(
@@ -132,14 +125,31 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 	}
 
 	// Create websocket client
-	wsClient, _, err := connection.InitRPCClient(p.logger, destClientInstance.Chain.RPCServerAddress, "/websocket")
-	if err != nil {
-		return fmt.Errorf("failed to create websocket client: %w", err)
+	var wsClient *rpchttp.HTTP
+
+	entry, err := p.clientRegistry.GetRPCClient(request.DestinationChain)
+	if err == nil && entry != nil {
+		// Use the multi-endpoint RPC client's current endpoint
+		currentEndpoint, _ := entry.GetCurrentEndpoint()
+		wsClient, _, err = connection.InitRPCClient(p.logger, currentEndpoint.Address, currentEndpoint.WebsocketPath, currentEndpoint.APIKey)
+		if err != nil {
+			return fmt.Errorf("failed to create websocket client: %w", err)
+		}
+	} else {
+		// Fallback to the first RPC endpoint
+		if len(destClientInstance.Chain.RPCEndpoints) == 0 {
+			return fmt.Errorf("no RPC endpoints configured for chain %s", request.DestinationChain)
+		}
+		rpcAddress := destClientInstance.Chain.RPCEndpoints[0].Address
+		apiKey := destClientInstance.Chain.RPCEndpoints[0].APIKey
+		wsClient, _, err = connection.InitRPCClient(p.logger, rpcAddress, "/websocket", apiKey)
+		if err != nil {
+			return fmt.Errorf("failed to create websocket client: %w", err)
+		}
 	}
 	defer func() {
 		if err := wsClient.Stop(); err != nil {
-			// Handle the error, e.g., log it
-			p.logger.Info("Error stopping wsClient:", zap.Error(err))
+			p.logger.Error("Failed to stop websocket client", zap.Error(err))
 		}
 	}()
 

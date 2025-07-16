@@ -17,16 +17,15 @@ type SigningKey struct {
 }
 
 type Chain struct {
-	Prefix            string   `toml:"prefix" mapstructure:"prefix"`
-	ChainID           string   `toml:"chain_id" mapstructure:"chain_id"`
-	Fees              *string  `toml:"fees" mapstructure:"fees"`
-	Gas               *string  `toml:"gas" mapstructure:"gas"`
-	GasAdjustment     *float64 `toml:"gas_adjustment" mapstructure:"gas_adjustment"`
-	GasPrices         *string  `toml:"gas_prices" mapstructure:"gas_prices"`
-	GasDenom          string   `toml:"gas_denom" mapstructure:"gas_denom"`
-	GRPCServerAddress string   `toml:"grpc_server_address" mapstructure:"grpc_server_address"`
-	GRPCTLS           bool     `toml:"grpc_tls" mapstructure:"grpc_tls"`
-	RPCServerAddress  string   `toml:"rpc_server_address" mapstructure:"rpc_server_address"`
+	Prefix        string               `toml:"prefix" mapstructure:"prefix"`
+	ChainID       string               `toml:"chain_id" mapstructure:"chain_id"`
+	Fees          *string              `toml:"fees" mapstructure:"fees"`
+	Gas           *string              `toml:"gas" mapstructure:"gas"`
+	GasAdjustment *float64             `toml:"gas_adjustment" mapstructure:"gas_adjustment"`
+	GasPrices     *string              `toml:"gas_prices" mapstructure:"gas_prices"`
+	GasDenom      string               `toml:"gas_denom" mapstructure:"gas_denom"`
+	GRPCEndpoints []GRPCEndpointConfig `toml:"grpc_endpoints" mapstructure:"grpc_endpoints"`
+	RPCEndpoints  []RPCEndpointConfig  `toml:"rpc_endpoints" mapstructure:"rpc_endpoints"`
 }
 
 type Config struct {
@@ -40,6 +39,17 @@ type Config struct {
 	TxRetryDelay  time.Duration    `toml:"tx_retry_delay_ms"`
 	DryRun        bool             `toml:"dry_run"`
 	PropTrade     bool             `toml:"prop_trade"`
+}
+
+type GRPCEndpointConfig struct {
+	Address  string `toml:"grpc_server_address" mapstructure:"grpc_server_address"`
+	UseTLS   bool   `toml:"grpc_tls" mapstructure:"grpc_tls"`
+	APIToken string `toml:"grpc_api_token" mapstructure:"grpc_api_token"`
+}
+
+type RPCEndpointConfig struct {
+	Address string `toml:"rpc_server_address" mapstructure:"rpc_server_address"`
+	APIKey  string `toml:"rpc_api_token" mapstructure:"rpc_api_token"`
 }
 
 type LocustVault struct {
