@@ -263,6 +263,7 @@ func (m *DydxProvider) GetAccountBalance() (sdk.Coins, error) {
 		conn, err := connection.SetupGRPCConnection(
 			cl.Chain.GRPCEndpoints[0].Address,
 			cl.Chain.GRPCEndpoints[0].UseTLS,
+			cl.Chain.GRPCEndpoints[0].APIToken,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to GRPC server: %w", err)

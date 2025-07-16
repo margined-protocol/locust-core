@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding"
+	"google.golang.org/grpc/metadata"
 )
 
 const (
@@ -28,6 +29,7 @@ const (
 type GRPCEndpointConfig struct {
 	Address string
 	UseTLS  bool
+	APIKey  string
 }
 
 // customCodec implements a custom codec for gogoproto that handles the serialization differences
@@ -57,7 +59,7 @@ func (c customCodec) Name() string {
 }
 
 // SetupGRPCConnection establishes a GRPC connection, optionally using system's TLS certificates
-func SetupGRPCConnection(address string, useTLS bool) (*grpc.ClientConn, error) {
+func SetupGRPCConnection(address string, useTLS bool, apiToken string) (*grpc.ClientConn, error) {
 	// Create custom codec for gogoproto compatibility
 	customCodec := &customCodec{parentCodec: encoding.GetCodec("proto")}
 
@@ -65,6 +67,14 @@ func SetupGRPCConnection(address string, useTLS bool) (*grpc.ClientConn, error) 
 
 	// Always use the custom codec regardless of TLS setting
 	opts = append(opts, grpc.WithDefaultCallOptions(grpc.ForceCodec(customCodec)))
+
+	// Add API token interceptor if provided
+	if apiToken != "" {
+		opts = append(opts, grpc.WithUnaryInterceptor(func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+			ctx = metadata.AppendToOutgoingContext(ctx, "X-API-TOKEN", apiToken)
+			return invoker(ctx, method, req, reply, cc, opts...)
+		}))
+	}
 
 	if useTLS {
 		systemCertPool, err := x509.SystemCertPool()
@@ -166,7 +176,7 @@ func (c *MultiEndpointGRPCClient) connectToEndpoint() error {
 		zap.Bool("useTLS", endpoint.UseTLS))
 
 	// Use the existing SetupGRPCConnection function for consistency
-	conn, err := SetupGRPCConnection(endpoint.Address, endpoint.UseTLS)
+	conn, err := SetupGRPCConnection(endpoint.Address, endpoint.UseTLS, endpoint.APIKey) // No API token for now
 	if err != nil {
 		return fmt.Errorf("failed to connect to gRPC endpoint %s: %w", endpoint.Address, err)
 	}

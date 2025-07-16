@@ -24,6 +24,7 @@ const (
 type RPCEndpointConfig struct {
 	Address       string
 	WebsocketPath string
+	APIKey        string
 }
 
 // MultiEndpointRPCClient manages multiple RPC endpoints with automatic failover
@@ -103,7 +104,7 @@ func (c *MultiEndpointRPCClient) connectToEndpoint() error {
 		zap.String("websocket_path", endpoint.WebsocketPath))
 
 	// Use the existing InitRPCClient function for consistency
-	client, cometClient, err := InitRPCClient(c.logger, endpoint.Address, endpoint.WebsocketPath)
+	client, cometClient, err := InitRPCClient(c.logger, endpoint.Address, endpoint.WebsocketPath, endpoint.APIKey)
 	if err != nil {
 		return fmt.Errorf("failed to connect to RPC endpoint %s: %w", endpoint.Address, err)
 	}

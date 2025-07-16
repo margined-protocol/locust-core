@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
@@ -194,12 +195,27 @@ func BroadcastShortTermOrder(ctx context.Context, l *zap.Logger, cosmosClient *c
 
 // InitRPCClient initialises a RPC client with websocket support.
 // It returns an error if websocket connection fails.
-func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string) (*rpchttp.HTTP, cometbft.CometRPC, error) {
+func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string, apiToken string) (*rpchttp.HTTP, cometbft.CometRPC, error) {
 	logger.Debug("Initializing RPC client",
 		zap.String("serverAddress", serverAddress),
 		zap.String("websocketPath", websocketPath))
 
-	client, err := rpchttp.New(serverAddress, websocketPath)
+	var client *rpchttp.HTTP
+	var err error
+
+	if apiToken != "" {
+		// Create custom HTTP client with API token header
+		customHTTPClient := &http.Client{
+			Transport: &headerTransport{
+				base:    http.DefaultTransport,
+				headers: map[string]string{"X-API-TOKEN": apiToken},
+			},
+		}
+		client, err = rpchttp.NewWithClient(serverAddress, websocketPath, customHTTPClient)
+	} else {
+		client, err = rpchttp.New(serverAddress, websocketPath)
+	}
+
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating RPC client: %w", err)
 	}
@@ -219,6 +235,19 @@ func InitRPCClient(logger *zap.Logger, serverAddress, websocketPath string) (*rp
 	return client, client, nil
 }
 
+// headerTransport wraps an http.RoundTripper and adds custom headers
+type headerTransport struct {
+	base    http.RoundTripper
+	headers map[string]string
+}
+
+func (t *headerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	for key, value := range t.headers {
+		req.Header.Set(key, value)
+	}
+	return t.base.RoundTrip(req)
+}
+
 // InitCosmosClient initializes a Cosmos client with retry logic
 func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, key *types.SigningKey) (*cosmosclient.Client, error) {
 	// Ensure we have at least one RPC endpoint
@@ -228,13 +257,31 @@ func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, ke
 
 	// Use the first RPC endpoint address
 	rpcServerAddress := chain.RPCEndpoints[0].Address
+	apiToken := chain.RPCEndpoints[0].APIKey
 
 	opts := []cosmosclient.Option{
-		cosmosclient.WithNodeAddress(rpcServerAddress),
 		cosmosclient.WithAddressPrefix(chain.Prefix),
 		cosmosclient.WithKeyringBackend(cosmosaccount.KeyringBackend(key.Backend)),
 		cosmosclient.WithKeyringDir(key.RootDir),
 		cosmosclient.WithKeyringServiceName(key.AppName),
+	}
+
+	// Add custom RPC client with API token if provided
+	if apiToken != "" {
+		customRPCClient, err := rpchttp.NewWithClient(rpcServerAddress, "/websocket", &http.Client{
+			Transport: &headerTransport{
+				base: http.DefaultTransport,
+				headers: map[string]string{
+					"X-API-TOKEN": apiToken,
+				},
+			},
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create custom RPC client: %w", err)
+		}
+		opts = append(opts, cosmosclient.WithRPCClient(customRPCClient))
+	} else {
+		opts = append(opts, cosmosclient.WithNodeAddress(rpcServerAddress))
 	}
 
 	// If gas, gas adjustment, and gas prices are not set, return an error

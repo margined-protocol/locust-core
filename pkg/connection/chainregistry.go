@@ -257,6 +257,7 @@ func (r *ClientRegistry) GetBalance(ctx context.Context, chainID, signerAccount,
 		conn, err := SetupGRPCConnection(
 			client.Chain.GRPCEndpoints[0].Address,
 			client.Chain.GRPCEndpoints[0].UseTLS,
+			client.Chain.GRPCEndpoints[0].APIToken,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to GRPC server: %w", err)

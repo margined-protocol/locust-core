@@ -42,12 +42,14 @@ type Config struct {
 }
 
 type GRPCEndpointConfig struct {
-	Address string `toml:"grpc_server_address" mapstructure:"grpc_server_address"`
-	UseTLS  bool   `toml:"grpc_tls" mapstructure:"grpc_tls"`
+	Address  string `toml:"grpc_server_address" mapstructure:"grpc_server_address"`
+	UseTLS   bool   `toml:"grpc_tls" mapstructure:"grpc_tls"`
+	APIToken string `toml:"grpc_api_token" mapstructure:"grpc_api_token"`
 }
 
 type RPCEndpointConfig struct {
 	Address string `toml:"rpc_server_address" mapstructure:"rpc_server_address"`
+	APIKey  string `toml:"rpc_api_token" mapstructure:"rpc_api_token"`
 }
 
 type LocustVault struct {

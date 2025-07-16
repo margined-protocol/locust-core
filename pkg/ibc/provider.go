@@ -131,7 +131,7 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 	if err == nil && entry != nil {
 		// Use the multi-endpoint RPC client's current endpoint
 		currentEndpoint, _ := entry.GetCurrentEndpoint()
-		wsClient, _, err = connection.InitRPCClient(p.logger, currentEndpoint.Address, currentEndpoint.WebsocketPath)
+		wsClient, _, err = connection.InitRPCClient(p.logger, currentEndpoint.Address, currentEndpoint.WebsocketPath, currentEndpoint.APIKey)
 		if err != nil {
 			return fmt.Errorf("failed to create websocket client: %w", err)
 		}
@@ -141,7 +141,8 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 			return fmt.Errorf("no RPC endpoints configured for chain %s", request.DestinationChain)
 		}
 		rpcAddress := destClientInstance.Chain.RPCEndpoints[0].Address
-		wsClient, _, err = connection.InitRPCClient(p.logger, rpcAddress, "/websocket")
+		apiKey := destClientInstance.Chain.RPCEndpoints[0].APIKey
+		wsClient, _, err = connection.InitRPCClient(p.logger, rpcAddress, "/websocket", apiKey)
 		if err != nil {
 			return fmt.Errorf("failed to create websocket client: %w", err)
 		}
