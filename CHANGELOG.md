@@ -1,13 +1,10 @@
 
-## [0.6.1](https://github.com/margined-protocol/locust-core/compare/v0.0.6..v0.6.1) - 2025-05-13
+## [0.6.2](https://github.com/margined-protocol/locust-core/compare/v0.0.6..v0.6.2) - 2025-07-16
 
 ### ⛰️  Features
 
-- Fixed panic and added additional previously private repo - ([17f1b4c](https://github.com/margined-protocol/locust-core/commit/17f1b4c53624c60a073b4a8ab547e9450ebdcc8e))
-
-### ⚙️ Miscellaneous Tasks
-
-- Fix test - ([2166a3a](https://github.com/margined-protocol/locust-core/commit/2166a3ad5bf8bc1ab25484717bccfc01c5f0d14b))
+- Fix conflicts and linter errors - ([d8321f8](https://github.com/margined-protocol/locust-core/commit/d8321f836c6e1bb75ac7d9f55f75bf8e7d68caff))
+- Added api keys - ([5b4f112](https://github.com/margined-protocol/locust-core/commit/5b4f112e24dd6fb908c923bddd69d1c82df74b4f))
 
 
 ## [0.0.6](https://github.com/margined-protocol/locust-core/compare/v0.0.5..v0.0.6) - 2025-05-06
