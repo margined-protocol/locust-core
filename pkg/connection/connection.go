@@ -259,6 +259,7 @@ func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, ke
 	rpcServerAddress := chain.RPCEndpoints[0].Address
 	apiToken := chain.RPCEndpoints[0].APIToken
 
+
 	opts := []cosmosclient.Option{
 		cosmosclient.WithAddressPrefix(chain.Prefix),
 		cosmosclient.WithKeyringBackend(cosmosaccount.KeyringBackend(key.Backend)),
