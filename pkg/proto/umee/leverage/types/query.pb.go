@@ -434,7 +434,8 @@ type QueryMarketSummaryResponse struct {
 	// Exponent is the power of ten required to get from base denom to symbol denom. For example, an exponent of 6 means 10^6 uumee = 1 UMEE.
 	Exponent uint32 `protobuf:"varint,2,opt,name=exponent,proto3" json:"exponent,omitempty"`
 	// Oracle Price is the current USD value of a token. Oracle price is nil when the oracle is down.
-	OraclePrice *cosmossdk_io_math.LegacyDec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_price,omitempty"`
+	OraclePrice *cosmossdk_io_math.LegacyDec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=cosmossdk_io_math.LegacyDec" json:"oracle_price,omitempty"`
+	// OraclePrice *cosmossdk_io_math.LegacyDec `protobuf:"bytes,3,opt,name=oracle_price,json=oraclePrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"oracle_price,omitempty"`
 	// uToken Exchange Rate is the amount of base tokens received when withdrawing 1 uToken. For example, a uToken exchange rate of 1.5 means a supplier receives 3 uumee for every 2 u/uumee they wish to withdraw. The same applies in reverse: supplying 3 uumee would award 2 u/uumee at that time.
 	UTokenExchangeRate cosmossdk_io_math.LegacyDec `protobuf:"bytes,4,opt,name=uToken_exchange_rate,json=uTokenExchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"utoken_exchange_rate"`
 	// Supply APY is the current interest rate suppliers are receiving for their deposits. For example, 0.11 would mean 11% APY. Supply APY is always less than borrow APY.

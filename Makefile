@@ -18,12 +18,12 @@ all: lint test
 .PHONY: lint
 lint:
 	@echo "Running golangci-lint..."
-	@$(GO) tool golangci-lint run ./...
+	@golangci-lint run ./...
 
 .PHONY: fix
 fix: 
 	@echo "Running golangci-lint fix..."
-	@$(GO) tool golangci-lint run --fix ./...
+	@golangci-lint run --fix ./...
 
 ## Testing
 .PHONY: test

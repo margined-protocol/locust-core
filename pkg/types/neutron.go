@@ -104,6 +104,7 @@ type DexArbitrageStrategyConfig struct {
 
 type CoinHedgeStrategyConfig struct {
 	Kill              bool         `toml:"kill" mapstructure:"kill"`                   // will kill the strategy, not for production use
+	Send              bool         `toml:"send" mapstructure:"send"`                   // will send funds to the receivcer address
 	FundContract      string       `toml:"fund_contract" mapstructure:"fund_contract"` // Fund contract address, if not prop trading
 	ChainID           string       `toml:"chain_id" mapstructure:"chain_id"`
 	Name              string       `toml:"name" mapstructure:"name"` // some human intelligible name for the strategy, e.g. "ATOM Hedge Hydro"

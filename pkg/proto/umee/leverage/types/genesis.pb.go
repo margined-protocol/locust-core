@@ -196,7 +196,7 @@ var xxx_messageInfo_BadDebt proto.InternalMessageInfo
 // state.
 type InterestScalar struct {
 	Denom  string                                 `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
-	Scalar cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=scalar,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"scalar"`
+	Scalar cosmossdk_io_math.LegacyDec `protobuf:"bytes,2,opt,name=scalar,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"scalar"`
 }
 
 func (m *InterestScalar) Reset()         { *m = InterestScalar{} }
