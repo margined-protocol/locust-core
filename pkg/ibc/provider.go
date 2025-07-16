@@ -142,7 +142,7 @@ func (p *DefaultTransferProvider) waitForReceivePacket(
 		}
 		rpcAddress := destClientInstance.Chain.RPCEndpoints[0].Address
 		apiKey := destClientInstance.Chain.RPCEndpoints[0].APIToken
-    
+
 		wsClient, _, err = connection.InitRPCClient(p.logger, rpcAddress, "/websocket", apiKey)
 		if err != nil {
 			return fmt.Errorf("failed to create websocket client: %w", err)
