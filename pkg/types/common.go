@@ -48,8 +48,8 @@ type GRPCEndpointConfig struct {
 }
 
 type RPCEndpointConfig struct {
-	Address string `toml:"rpc_server_address" mapstructure:"rpc_server_address"`
-	APIKey  string `toml:"rpc_api_token" mapstructure:"rpc_api_token"`
+	Address  string `toml:"rpc_server_address" mapstructure:"rpc_server_address"`
+	APIToken string `toml:"rpc_api_token" mapstructure:"rpc_api_token"`
 }
 
 type LocustVault struct {

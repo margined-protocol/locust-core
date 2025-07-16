@@ -257,7 +257,7 @@ func InitCosmosClient(ctx context.Context, l *zap.Logger, chain *types.Chain, ke
 
 	// Use the first RPC endpoint address
 	rpcServerAddress := chain.RPCEndpoints[0].Address
-	apiToken := chain.RPCEndpoints[0].APIKey
+	apiToken := chain.RPCEndpoints[0].APIToken
 
 	opts := []cosmosclient.Option{
 		cosmosclient.WithAddressPrefix(chain.Prefix),
