@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/cinar/indicator/v2 v2.1.12
+	github.com/cinar/indicator/v2 v2.1.15
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/cosmos/ibc-go/v8 v8.0.0
